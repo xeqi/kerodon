@@ -3,25 +3,25 @@
             [net.cgrand.enlive-html :as enlive]
             [clojure.string :as string]))
 
-(defn ^:private field-value [node value name]
+(defn #^{:private true} field-value [node value name]
   (enlive/transform node
                     [:form :> (enlive/attr-has :name name)]
                     (fn [node]
                       (assoc-in node [:attrs :value] value))))
 
-(defn ^:private find-form-with-submit [node text]
+(defn #^{:private true} find-form-with-submit [node text]
   (enlive/select node
                  [[:form (enlive/has [[:input
                                        (enlive/attr-has :type "submit")
                                        (enlive/attr-has :value text)]])]]))
 
-(defn ^:private find-submit [node text]
+(defn #^{:private true} find-submit [node text]
   (enlive/select node
                  [[:input
                    (enlive/attr-has :type "submit")
                    (enlive/attr-has :value text)]]))
 
-(def ^:private fillable
+(def #^{:private true} fillable
   #{[:input
      (enlive/but
       (enlive/attr-has :type "submit"))]
