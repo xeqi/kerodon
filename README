@@ -6,7 +6,7 @@ Based on a similar api to Capybara.
 
 ## Usage
 
-FIXME: write
+See https://github.com/xeqi/clojars-web/blob/tests/test/clojars/test/integration/sessions.clj
 
 ## TODO
 
