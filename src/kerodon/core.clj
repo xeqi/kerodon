@@ -12,14 +12,14 @@
 (defn #^{:private true} find-form-with-submit [node text]
   (enlive/select node
                  [[:form (enlive/has [[:input
-                                       (enlive/attr-has :type "submit")
-                                       (enlive/attr-has :value text)]])]]))
+                                       (enlive/attr= :type "submit")
+                                       (enlive/attr= :value text)]])]]))
 
 (defn #^{:private true} find-submit [node text]
   (enlive/select node
                  [[:input
-                   (enlive/attr-has :type "submit")
-                   (enlive/attr-has :value text)]]))
+                   (enlive/attr= :type "submit")
+                   (enlive/attr= :value text)]]))
 
 (def #^{:private true} fillable
   #{[:input
