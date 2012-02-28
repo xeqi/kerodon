@@ -27,15 +27,20 @@
       (enlive/attr-has :type "submit"))]
     :textarea})
 
+(defn css-or-content [text]
+  #{(keyword text) (enlive/pred #(= (:content %) [text]))})
+
 (defn fill-in [state text input]
   (update-in state [:html]
              (fn [node]
-               (->> (enlive/select node [:form :> (enlive/pred #(= (:content %)
-                                                                  [text]))])
-                   first
-                   :attrs
-                   :for
-                   (field-value node input)))))
+               (let [elem (first (enlive/select
+                                  node
+                                  [:form :> (css-or-content text)]))]
+                 (field-value node
+                              input
+                              (if (= :input (:tag elem))
+                                (:name (:attrs elem))
+                                (:for (:attrs elem))))))))
 
 (defn request
   ([state method url params]
@@ -79,7 +84,7 @@
 (defn follow [state text]
   (request state :get
             (-> (:html state)
-                (enlive/select [[:a (enlive/pred #(= (:content %) [text]))]])
+                (enlive/select [[:a (css-or-content text)]])
                 first
                 :attrs
                 :href)))
