@@ -1,13 +1,18 @@
 (ns kerodon.core
   (:require [ring.mock.request :as request]
             [net.cgrand.enlive-html :as enlive]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [peridot.core :as peridot]))
 
-(defn #^{:private true} field-value [node value name]
-  (enlive/transform node
-                    [:form :> (enlive/attr-has :name name)]
-                    (fn [node]
-                      (assoc-in node [:attrs :value] value))))
+(def #^{:private true} fillable
+  #{[:input
+     (enlive/but
+      (enlive/attr-has :type "submit"))]
+    :textarea})
+
+(defn #^{:private true} css-or-content [selector]
+  #{(keyword selector) (enlive/pred #(= (:content %) [selector]))})
+
 
 (defn #^{:private true} find-form-with-submit [node text]
   (enlive/select node
@@ -21,87 +26,69 @@
                    (enlive/attr= :type "submit")
                    (enlive/attr= :value text)]]))
 
-(def #^{:private true} fillable
-  #{[:input
-     (enlive/but
-      (enlive/attr-has :type "submit"))]
-    :textarea})
+;TODO: merge w/ peridot
+(defn build-url [{:keys [scheme server-name port uri query-string]}]
+  (str (name scheme)
+       "://"
+       server-name
+       (when (and port
+                  (not= port (scheme {:https 443 :http 80})))
+         (str ":" port))
+       uri
+       query-string))
 
-(defn css-or-content [text]
-  #{(keyword text) (enlive/pred #(= (:content %) [text]))})
+(defn visit [state & rest]
+  (let [state (apply peridot/request state rest)]
+    (assoc state
+      :html (enlive/html-resource
+             (java.io.StringReader. (:body (:response state)))))))
 
-(defn fill-in [state text input]
+(defn fill-in [state selector input]
   (update-in state [:html]
              (fn [node]
-               (let [elem (first (enlive/select
-                                  node
-                                  [:form :> (css-or-content text)]))]
-                 (field-value node
-                              input
-                              (if (= :input (:tag elem))
-                                (:name (:attrs elem))
-                                (:for (:attrs elem))))))))
+               (if-let [elem (first (enlive/select
+                                     node
+                                     [:form :> (css-or-content selector)]))]
+                 (enlive/transform node
+                                   [:form :> (enlive/attr-has
+                                              :name
+                                              (if (= :input (:tag elem))
+                                                (:name (:attrs elem))
+                                                (:for (:attrs elem))))]
+                                   (fn [node]
+                                     (assoc-in node [:attrs :value] input)))
+                 (throw (Exception.
+                         (str "field could not be found with selector \""
+                              selector "\"")))))))
 
-(defn request
-  ([state method url params]
-     (let [response ((:ring-app state)
-                     (reduce #(request/header %1 "Cookie" %2)
-                              (request/request method url params)
-                              (:cookie-string state)))]
-       (-> response
-           (assoc :html (enlive/html-resource
-                         (java.io.StringReader. (:body response))))
-           ;; TODO: handle cookies better
-           ;; This completely ignores cookie attributes
-           (assoc :cookie-string
-             (let [cookies (map #(re-find #"[^;]*" %)
-                                ((:headers response) "Set-Cookie"))]
-               (if (empty? cookies)
-                 (:cookie-string state)
-                 cookies)))
-           (assoc :ring-app (:ring-app state)))))
-  ([state method url]
-     (request state method url {})))
-
-(defn follow-redirect [state]
-  (request state :get ((:headers state) "Location")))
-
-(defn press [state text]
-  (let [form (first (find-form-with-submit (:html state) text))
-        method (keyword (string/lower-case (:method (:attrs form))))
-        submit (first (find-submit form text))
-        url (:action (:attrs form))
-        params (into {}
-                     (map (comp (juxt (comp str :name)
-                                      (comp str :value)) :attrs)
-                          (enlive/select form
-                                         [fillable])))]
-    (request state
-             method
+(defn press [state selector]
+  (if-let [form (first (find-form-with-submit (:html state) selector))]
+    (let [method (keyword (string/lower-case (or (:method (:attrs form))
+                                                 "post")))
+          url (or (:action (:attrs form))
+                  (build-url (:request state)))
+          params (into {}
+                       (map (comp (juxt (comp str :name)
+                                        (comp str :value)) :attrs)
+                            (enlive/select form
+                                           [fillable])))]
+      (visit state
              url
-             params)))
+             :request-method method
+             :params params))
+    (throw (Exception.
+            (str "button could not be found with selector \""
+                 selector "\"")))))
 
 (defn follow [state text]
-  (request state :get
-            (-> (:html state)
+  (visit state (-> (:html state)
                 (enlive/select [[:a (css-or-content text)]])
                 first
                 :attrs
                 :href)))
 
-(defn init [& params]
-  (apply hash-map params))
+(def follow-redirect peridot/follow-redirect)
 
-(defn status [f]
-  (fn [{status :status}] (f status)))
+(def session peridot/session)
 
-(defn headers [f]
-  (fn [{headers :headers}] (f headers)))
-
-(defn html [f]
-  (fn [{html :html}] (f html)))
-
-(defn validate [state & fs]
-  (doseq [f fs]
-    (f state))
-  state)
+(def validate peridot/dofns)
