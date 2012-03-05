@@ -32,7 +32,7 @@
                           "password"))
                 (assoc (response/redirect "/") :session {:user "someone"})
                 (response/response "Bad login")))}
-     ["login-without-labels"]
+     ["login-with-css"]
      {:get (constantly
             (response/response
              (hiccup/html [:form {:action "/login" :method "post"}
@@ -40,7 +40,9 @@
                            [:input {:class "password"
                                     :type "password"
                                     :name "password"}]
-                           [:input {:type "submit" :value "Login"}]])))}
+                           [:input {:id "some-button"
+                                    :type "submit"
+                                    :value "Login"}]])))}
      ["login-without-method"]
      {:get (constantly
             (response/response
@@ -87,33 +89,28 @@
       (fill-in "Password" "password")
       (press "Login")
       (follow-redirect)
-      (validate
-       #(is (= "hi someone"
-               (:body (:response %)))
-            "press sends form fields to action url"))))
+      (has (in [:response :body] "hi someone")
+           "press sends form fields to action url")))
 
 (deftest selector-not-found
-  (-> (session app)
-      (visit "/")
-      (validate
-       #(is (thrown-with-msg? Exception
-              #"field could not be found with selector \"NonExistant\""
-              (fill-in % "NonExistant" "")))
-       #(is (thrown-with-msg? Exception
-              #"button could not be found with selector \"NonExistant\""
-              (press % "NonExistant"))))))
+  (let [state (-> (session app)
+                  (visit "/"))]
+    (is (thrown-with-msg? Exception
+          #"field could not be found with selector \"NonExistant\""
+          (fill-in state "NonExistant" "")))
+    (is (thrown-with-msg? Exception
+          #"button could not be found with selector \"NonExistant\""
+          (press state "NonExistant")))))
 
-(deftest form-without-labels
+(deftest form-by-css
   (-> (session app)
-      (visit "/login-without-labels")
-      (fill-in "#user" "someone")
-      (fill-in ".password" "password")
-      (press "Login")
+      (visit "/login-with-css")
+      (fill-in [:#user] "someone")
+      (fill-in [:.password] "password")
+      (press [:#some-button])
       (follow-redirect)
-      (validate
-       #(is (= "hi someone"
-               (:body (:response %)))
-            "fill-in can find input by css"))))
+      (has (in [:response :body] "hi someone")
+           "fill-in and press can find by css")))
 
 (deftest form-without-action
   (-> (session app)
@@ -122,10 +119,8 @@
       (fill-in "Password" "password")
       (press "Login")
       (follow-redirect)
-      (validate
-       #(is (= "hi someone"
-               (:body (:response %)))
-            "press sends form fields to same url when action is blank"))))
+      (has (in [:response :body] "hi someone")
+           "press sends form fields to same url when action is blank")))
 
 (deftest form-without-method
   (-> (session app)
@@ -134,10 +129,8 @@
       (fill-in "Password" "password")
       (press "Login")
       (follow-redirect)
-      (validate
-       #(is (= "hi someone"
-               (:body (:response %)))
-            "press sends form fields to action url with post when method blank"))))
+      (has (in [:response :body] "hi someone")
+           "press sends form fields to action url with post when method blank")))
 
 (deftest text-area
   (-> (session app)
@@ -146,7 +139,5 @@
       (fill-in "Password" "password")
       (press "Login")
       (follow-redirect)
-      (validate
-       #(is (= "hi someone"
-               (:body (:response %)))
-            "fill-in and press work for textareas"))))
+      (has (in [:response :body] "hi someone")
+            "fill-in and press work for textareas")))

@@ -11,14 +11,18 @@
     :textarea})
 
 (defn #^{:private true} css-or-content [selector]
-  #{(keyword selector) (enlive/pred #(= (:content %) [selector]))})
+  (if (string? selector)
+    (enlive/pred #(= (:content %) [selector]))
+    selector))
 
 
-(defn #^{:private true} find-form-with-submit [node text]
+(defn #^{:private true} find-form-with-submit [node selector]
   (enlive/select node
                  [[:form (enlive/has [[:input
                                        (enlive/attr= :type "submit")
-                                       (enlive/attr= :value text)]])]]))
+                                       (if (string? selector)
+                                         (enlive/attr= :value selector)
+                                         selector)]])]]))
 
 (defn #^{:private true} find-submit [node text]
   (enlive/select node
@@ -27,7 +31,8 @@
                    (enlive/attr= :value text)]]))
 
 ;TODO: merge w/ peridot
-(defn build-url [{:keys [scheme server-name port uri query-string]}]
+(defn #^{:private true} build-url
+  [{:keys [scheme server-name port uri query-string]}]
   (str (name scheme)
        "://"
        server-name
@@ -91,4 +96,6 @@
 
 (def session peridot/session)
 
-(def validate peridot/dofns)
+(defmacro has
+  ([state form msg]
+     `(peridot/has ~state ~form ~msg)))
