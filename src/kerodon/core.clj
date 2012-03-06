@@ -42,11 +42,13 @@
        uri
        query-string))
 
+(defn #^{:private true} assoc-html [state]
+  (assoc state
+    :html (enlive/html-resource
+           (java.io.StringReader. (:body (:response state))))))
+
 (defn visit [state & rest]
-  (let [state (apply peridot/request state rest)]
-    (assoc state
-      :html (enlive/html-resource
-             (java.io.StringReader. (:body (:response state)))))))
+  (assoc-html (apply peridot/request state rest)))
 
 (defn fill-in [state selector input]
   (update-in state [:html]
@@ -92,10 +94,13 @@
                 :attrs
                 :href)))
 
-(def follow-redirect peridot/follow-redirect)
+(defn follow-redirect [state]
+  (assoc-html (peridot/follow-redirect state)))
 
 (def session peridot/session)
 
 (defmacro has
+  ([state form]
+     `(has ~state ~form nil))
   ([state form msg]
      `(peridot/has ~state ~form ~msg)))
