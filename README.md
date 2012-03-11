@@ -1,4 +1,4 @@
-# kerodon
+# kerodon [![Build Status](https://secure.travis-ci.org/xeqi/kerodon.png)](http://travis-ci.org/xeqi/kerodon)
 
 Acceptance test framework for web applications
 
