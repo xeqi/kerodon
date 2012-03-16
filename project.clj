@@ -3,7 +3,7 @@
   :url "https://github.com/xeqi/kerodon"
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.3.0"]
-                 [peridot "0.0.3"]
+                 [peridot "0.0.4"]
                  [enlive "1.0.0" :exclusions [org.clojure/clojure]]]
   :profiles {:test {:dependencies [[net.cgrand/moustache "1.1.0"
                                     :exclusions
