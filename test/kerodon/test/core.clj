@@ -5,6 +5,7 @@
             [ring.util.response :as response]
             [ring.middleware.params :as params]
             [ring.middleware.session :as session]
+            [net.cgrand.enlive-html :as enlive]
             [hiccup.core :as hiccup]))
 
 (def app
@@ -79,7 +80,30 @@
                            [:input {:type "submit" :value "Login"}]])))}
      ["logout"]
      {:post (fn [{:keys [params]}]
-              (assoc (response/redirect "/") :session nil))}))))
+              (assoc (response/redirect "/") :session nil))}
+     ["login-x2"]
+     {:get (constantly
+            (response/response
+             (hiccup/html [:div
+                           [:form {:id "1"}
+                            [:label {:for "user"} "User"]
+                            [:input {:type "text" :name "user"}]
+                            [:label {:for "password"} "Password"]
+                            [:input {:type "password" :name "password"}]
+                            [:input {:type "submit" :value "Login"}]]
+                           [:form {:id "2"}
+                            [:label {:for "user"} "User"]
+                            [:input {:type "text" :name "user"}]
+                            [:label {:for "password"} "Password"]
+                            [:input {:type "password" :name "password"}]
+                            [:input {:type "submit" :value "Login"}]]])))
+      :post (constantly (response/response "hi"))}
+     ["title"]
+     {:get (constantly
+            (response/response
+             (hiccup/html [:html
+                           [:head [:title "some title"]]
+                           [:body]])))}))))
 
 (deftest good-form
   (-> (session app)
@@ -89,7 +113,7 @@
       (fill-in "Password" "password")
       (press "Login")
       (follow-redirect)
-      (has (in [:response :body] "hi someone")
+      (has (text? "hi someone")
            "press sends form fields to action url")))
 
 (deftest selector-not-found
@@ -109,7 +133,7 @@
       (fill-in [:.password] "password")
       (press [:#some-button])
       (follow-redirect)
-      (has (in [:response :body] "hi someone")
+      (has (text? "hi someone")
            "fill-in and press can find by css")))
 
 (deftest form-without-action
@@ -119,7 +143,7 @@
       (fill-in "Password" "password")
       (press "Login")
       (follow-redirect)
-      (has (in [:response :body] "hi someone")
+      (has (text? "hi someone")
            "press sends form fields to same url when action is blank")))
 
 (deftest form-without-method
@@ -129,7 +153,7 @@
       (fill-in "Password" "password")
       (press "Login")
       (follow-redirect)
-      (has (in [:response :body] "hi someone")
+      (has (text? "hi someone")
            "press sends form fields to action url with post when method blank")))
 
 (deftest text-area
@@ -139,5 +163,37 @@
       (fill-in "Password" "password")
       (press "Login")
       (follow-redirect)
-      (has (in [:response :body] "hi someone")
-            "fill-in and press work for textareas")))
+      (has (text? "hi someone")
+           "fill-in and press work for textareas")))
+
+(deftest fill-in-can-be-checked-with-value?
+  (-> (session app)
+      (visit "/login")
+      (fill-in "User" "someone")
+      (has (value? "User" "someone"))))
+
+(deftest within-generic
+  (-> (session app)
+      (visit "/login-x2")
+      (within [:#2]
+              (fill-in "User" "someone"))
+      (within [:#2]
+              (has (value? "User" "someone")))
+      (within [:#1]
+              (has (value? "User" nil)))
+      (within [:#2]
+              (press "Login"))
+      (has (text? "hi"))))
+
+(deftest status-generic
+  (-> (session app)
+      (visit "/login")
+      (has (status? 200))
+      (visit "/non-existant")
+      (has (status? 404))))
+
+(deftest title-generic
+  (-> (session app)
+      (visit "/title")
+      (within [:title]
+              (has (text? "some title")))))
