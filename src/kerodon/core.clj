@@ -132,39 +132,39 @@
   ([state form msg]
      (form state msg)))
 
-(defn validate [comparator generator expected exp-msg]
-  (fn [state msg]
-    (try (let [value (generator state)]
-           (clojure.test/do-report {:actual value
-                                    :type (if (comparator value expected)
-                                            :pass
-                                            :fail)
-                                    :message msg
-                                    :expected exp-msg}))
-         (catch java.lang.Throwable t
-           (clojure.test/do-report {:actual t
-                                    :type :error
-                                    :message msg
-                                    :expected exp-msg})))
-    state))
+(defmacro validate [comparator generator expected exp-msg]
+  `(fn [state# msg#]
+     (try (let [value# (~generator state#)]
+            (clojure.test/do-report {:actual value#
+                                     :type (if (~comparator value# ~expected)
+                                             :pass
+                                             :fail)
+                                     :message msg#
+                                     :expected (quote ~exp-msg)}))
+          (catch java.lang.Throwable t#
+            (clojure.test/do-report {:actual t#
+                                     :type :error
+                                     :message msg#
+                                     :expected (quote ~exp-msg)})))
+     state#))
 
-(defn text? [expected]
-  (validate =
-            #(apply str (enlive/texts (:enlive %)))
-            expected
-            (list 'text? expected)))
+(defmacro text? [expected]
+  `(validate =
+             #(apply str (enlive/texts (:enlive %)))
+             ~expected
+             (~'text? ~expected)))
 
-(defn status? [expected]
-  (validate =
+(defmacro status? [expected]
+  `(validate =
             (comp :status :response)
-            expected
-            (list 'status? expected)))
+            ~expected
+            (~'status? ~expected)))
 
-(defn value? [selector expected]
-  (validate =
-            #(get-value % selector)
-            expected
-            (list 'value? selector expected)))
+(defmacro value? [selector expected]
+  `(validate =
+             #(get-value % ~selector)
+             ~expected
+             (~'value? ~selector ~expected)))
 
 (defn using [state selector f]
   (let [new-state (f (update-in state [:enlive]
