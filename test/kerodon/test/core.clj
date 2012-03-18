@@ -1,6 +1,7 @@
 (ns kerodon.test.core
   (:use [kerodon.core]
-        [clojure.test])
+        [clojure.test]
+        [kerodon.test])
   (:require [net.cgrand.moustache :as moustache]
             [ring.util.response :as response]
             [ring.middleware.params :as params]
@@ -156,7 +157,7 @@
       (has (text? "hi someone")
            "press sends form fields to action url with post when method blank")))
 
-(deftest text-area
+(deftest text-area-can-be-filled
   (-> (session app)
       (visit "/login-with-text-area")
       (fill-in "User" "someone")
