@@ -1,12 +1,16 @@
 (ns kerodon.impl.lookup
   (:require [net.cgrand.enlive-html :as enlive]
-            [ring.mock.request :as request]
-            [clojure.string :as string]))
+            [clojure.string :as string])
+  (:import org.apache.http.entity.mime.MultipartEntity
+           org.apache.http.entity.mime.content.StringBody
+           org.apache.http.entity.mime.content.FileBody
+           java.io.PipedOutputStream
+           java.io.PipedInputStream))
 
 (def fillable
   #{[:input
-     #{(enlive/but
-        (enlive/attr-has :type "submit"))}]
+     (enlive/but
+      (enlive/attr-has :type "submit"))]
     :textarea})
 
 (defn css-or-content [selector]
@@ -47,13 +51,12 @@
        query-string))
 
 (defn find-form-element [node selector]
-  (if-let [elem (enlive/select
-                 node
-                 [:form (css-or-content selector)])]
+  (if-let [elem (first (enlive/select
+                        node
+                        [:form (css-or-content selector)]))]
     elem
     (throw (Exception.
-            (str "field could not be found with selector
-                              \"" selector "\"")))))
+            (str "field could not be found with selector \"" selector "\"")))))
 
 (defn get-form-element-by-name [name]
   [:form (enlive/attr-has :name name)])
@@ -64,15 +67,13 @@
     (:for (:attrs elem))))
 
 (defn get-value [state selector]
-  ((fn [node]
-     (-> (enlive/select node
-                        (-> (find-form-element node selector)
-                            name-from-element
-                            get-form-element-by-name))
-         first
-         :attrs
-         :value))
-   (:enlive state)))
+  (-> (enlive/select (:enlive state)
+                     (-> (find-form-element (:enlive state) selector)
+                         name-from-element
+                         get-form-element-by-name))
+      first
+      :attrs
+      :value))
 
 (defn set-value [state selector input]
   (update-in state [:enlive]
@@ -81,8 +82,8 @@
                                  (-> (find-form-element node selector)
                                      name-from-element
                                      get-form-element-by-name)
-                                 (fn [node]
-                                   (assoc-in node [:attrs :value] input))))))
+                                 (fn [snode]
+                                   (assoc-in snode [:attrs :value] input))))))
 
 (defn find-url [state selector]
   (-> (:enlive state)
@@ -107,6 +108,30 @@
                                     (constantly (:enlive new-state))))
       new-state)))
 
+(defn multipart? [params]
+  (some :filename (vals params)))
+
+(defn add-file-part [m [k {:keys [filename content-type file]}]]
+  (.addPart m
+            k
+            (if content-type
+              (FileBody. file content-type)
+              (FileBody. file)))
+  m)
+
+(defn add-param-part [m [k v]]
+  (.addPart m
+            k
+            (StringBody. v)))
+
+(defn multipart-body [params]
+  (let [mpe (MultipartEntity.)]
+    (doseq [p params]
+      (if (:file (second p))
+        (add-file-part mpe p)
+        (add-param-part mpe p)))
+    mpe))
+
 (defn build-request-details [state selector]
   (if-let [form (first (find-form-with-submit (:enlive state) selector))]
     (let [method (keyword (string/lower-case (:method (:attrs form) "post")))
@@ -114,12 +139,20 @@
                   (build-url (:request state)))
           params (into {}
                        (map (comp (juxt (comp str :name)
-                                        (comp str :value)) :attrs)
+                                        :value) :attrs)
                             (enlive/select form
                                            [fillable])))]
-      [url
-       :request-method method
-       :params params])
+      (if (multipart? params)
+        (let [mpe (multipart-body params)]
+          [url
+           :request-method method
+           :body (let [in (PipedInputStream.)
+                       out (PipedOutputStream. in)]
+                   (.writeTo mpe out)
+                   in)
+           :content-length (.getContentLength mpe)
+           :content-type (.getValue (.getContentType mpe))])
+        [url :request-method method :params params]))
     (throw (Exception.
             (str "button could not be found with selector \""
                  selector "\"")))))

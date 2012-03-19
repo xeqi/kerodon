@@ -6,8 +6,10 @@
             [ring.util.response :as response]
             [ring.middleware.params :as params]
             [ring.middleware.session :as session]
+            [ring.middleware.multipart-params :as multipart-params]
             [net.cgrand.enlive-html :as enlive]
-            [hiccup.core :as hiccup]))
+            [hiccup.core :as hiccup]
+            [clojure.java.io :as io]))
 
 (def app
   (params/wrap-params
@@ -106,6 +108,46 @@
                            [:head [:title "some title"]]
                            [:body]])))}))))
 
+(def upload-app
+  (multipart-params/wrap-multipart-params
+   (params/wrap-params
+    (moustache/app
+     ["upload"]
+     {:get (constantly
+            (response/response
+             (hiccup/html
+              [:form {:enctype "multipart/form-data"}
+               [:input {:id "file" :name "file" :type "file"}]
+               [:input {:type "submit" :value "upload"}]])))
+      :post (fn [{:keys [params body]}]
+              (response/response
+               (hiccup/html [:html
+                             [:body
+                              (when-let [file (:tempfile (params "file"))]
+                                     (slurp file))]])))}))))
+
+(def upload-app-with-params
+  (multipart-params/wrap-multipart-params
+   (params/wrap-params
+    (moustache/app
+     ["upload"]
+     {:get (constantly
+            (response/response
+             (hiccup/html
+              [:form {:enctype "multipart/form-data"}
+               [:label {:for "u"} "Name"]
+               [:input {:type "text" :name "u"}]
+               [:input {:id "file" :name "file" :type "file"}]
+               [:input {:type "submit" :value "upload"}]])))
+      :post (fn [{:keys [params body]}]
+              (response/response
+               (hiccup/html [:html
+                             [:body
+                              (str (params "u")
+                                   " "
+                                   (when-let [file (:tempfile (params "file"))]
+                                     (slurp file)))]])))}))))
+
 (deftest good-form
   (-> (session app)
       (visit "/")
@@ -198,3 +240,24 @@
       (visit "/title")
       (within [:title]
               (has (text? "some title")))))
+
+(deftest attach-file-alone
+  (-> (session upload-app)
+      (visit "/upload")
+      (attach-file [:#file] (io/file (io/resource "file.txt")))
+      (press "upload")
+      (doto
+          (#(is (re-find #"multipart/form-data;"
+                         (:content-type (:request %))))))
+      (has (text? "hi from uploaded file\n"))))
+
+(deftest attach-file-with-params
+  (-> (session upload-app-with-params)
+      (visit "/upload")
+      (fill-in "Name" "name")
+      (attach-file [:#file] (io/file (io/resource "file.txt")))
+      (press "upload")
+      (doto
+          (#(is (re-find #"multipart/form-data;"
+                         (:content-type (:request %))))))
+      (has (text? "name hi from uploaded file\n"))))
