@@ -6,15 +6,10 @@ Based on a similar api to Capybara.
 
 ## Usage
 
-See https://github.com/xeqi/clojars-web/blob/tests/test/clojars/test/integration/sessions.clj
+See tests.
 
 ## TODO
 
-### Tests
-* Write a simple ring app to test against
-* Can we borrow some of Capybara's tests?
-
-### Usage
 * Write this readme
 * Write some doc-strings
 
