@@ -85,10 +85,16 @@
                                  (fn [snode]
                                    (assoc-in snode [:attrs :value] input))))))
 
+(defn find-link [state selector]
+  (if-let [link (first (enlive/select state [[:a (css-or-content selector)]]))]
+    link
+    (throw (Exception.
+            (str "link could not be found with selector \""
+                 selector "\"")))))
+
 (defn find-url [state selector]
   (-> (:enlive state)
-      (enlive/select [[:a (css-or-content selector)]])
-      first
+      (find-link selector)
       :attrs
       :href))
 

@@ -167,7 +167,10 @@
           (fill-in state "NonExistant" "")))
     (is (thrown-with-msg? Exception
           #"button could not be found with selector \"NonExistant\""
-          (press state "NonExistant")))))
+          (press state "NonExistant")))
+    (is (thrown-with-msg? Exception
+          #"link could not be found with selector \"NonExistant\""
+          (follow state "NonExistant")))))
 
 (deftest form-by-css
   (-> (session app)
