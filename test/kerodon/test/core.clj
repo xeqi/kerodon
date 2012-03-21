@@ -124,7 +124,7 @@
                (hiccup/html [:html
                              [:body
                               (when-let [file (:tempfile (params "file"))]
-                                     (slurp file))]])))}))))
+                                (slurp file))]])))}))))
 
 (def upload-app-with-params
   (multipart-params/wrap-multipart-params
@@ -260,7 +260,4 @@
       (fill-in "Name" "name")
       (attach-file [:#file] (io/file (io/resource "file.txt")))
       (press "upload")
-      (doto
-          (#(is (re-find #"multipart/form-data;"
-                         (:content-type (:request %))))))
       (has (text? "name hi from uploaded file\n"))))

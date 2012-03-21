@@ -1,11 +1,6 @@
 (ns kerodon.impl.lookup
   (:require [net.cgrand.enlive-html :as enlive]
-            [clojure.string :as string])
-  (:import org.apache.http.entity.mime.MultipartEntity
-           org.apache.http.entity.mime.content.StringBody
-           org.apache.http.entity.mime.content.FileBody
-           java.io.PipedOutputStream
-           java.io.PipedInputStream))
+            [clojure.string :as string]))
 
 (def fillable
   #{[:input
@@ -114,30 +109,6 @@
                                     (constantly (:enlive new-state))))
       new-state)))
 
-(defn multipart? [params]
-  (some :filename (vals params)))
-
-(defn add-file-part [m [k {:keys [filename content-type file]}]]
-  (.addPart m
-            k
-            (if content-type
-              (FileBody. file content-type)
-              (FileBody. file)))
-  m)
-
-(defn add-param-part [m [k v]]
-  (.addPart m
-            k
-            (StringBody. v)))
-
-(defn multipart-body [params]
-  (let [mpe (MultipartEntity.)]
-    (doseq [p params]
-      (if (:file (second p))
-        (add-file-part mpe p)
-        (add-param-part mpe p)))
-    mpe))
-
 (defn build-request-details [state selector]
   (if-let [form (first (find-form-with-submit (:enlive state) selector))]
     (let [method (keyword (string/lower-case (:method (:attrs form) "post")))
@@ -148,17 +119,7 @@
                                         :value) :attrs)
                             (enlive/select form
                                            [fillable])))]
-      (if (multipart? params)
-        (let [mpe (multipart-body params)]
-          [url
-           :request-method method
-           :body (let [in (PipedInputStream.)
-                       out (PipedOutputStream. in)]
-                   (.writeTo mpe out)
-                   in)
-           :content-length (.getContentLength mpe)
-           :content-type (.getValue (.getContentType mpe))])
-        [url :request-method method :params params]))
+      [url :request-method method :params params])
     (throw (Exception.
             (str "button could not be found with selector \""
                  selector "\"")))))

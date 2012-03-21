@@ -22,14 +22,5 @@
 (defmacro within [state selector & fns]
   `(lookup/using ~state ~selector #(-> % ~@fns)))
 
-(defmulti attach-file
-  (fn [state selector file-descriptor] (type file-descriptor)))
-
-(defmethod attach-file java.io.File [state selector file]
-  (attach-file state selector
-               {:filename (.getName file)
-                :content-type nil
-                :file file}))
-
-(defmethod attach-file java.util.Map [state selector file-descriptor]
-  (lookup/set-value state selector file-descriptor))
+(defn attach-file [state selector file]
+  (lookup/set-value state selector file))
