@@ -1,6 +1,6 @@
 (ns kerodon.test
-  (:use [kerodon.impl.lookup])
-  (:require [net.cgrand.enlive-html :as enlive]))
+  (:require [net.cgrand.enlive-html :as enlive]
+            [kerodon.impl :as impl]))
 
 (defn has
   ([state form]
@@ -38,6 +38,6 @@
 
 (defmacro value? [selector expected]
   `(validate =
-             #(get-value % ~selector)
+             #(impl/get-value % ~selector)
              ~expected
              (~'value? ~selector ~expected)))

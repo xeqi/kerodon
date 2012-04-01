@@ -1,26 +1,26 @@
 (ns kerodon.core
-  (:require [kerodon.impl.lookup :as lookup]
+  (:require [kerodon.impl :as impl]
             [peridot.core :as peridot]))
 
 (defn visit [state & rest]
-  (lookup/include-parse (apply peridot/request state rest)))
+  (impl/include-parse (apply peridot/request state rest)))
 
 (defn fill-in [state selector input]
-  (lookup/set-value state selector input))
+  (impl/set-value state selector input))
 
 (defn press [state selector]
-  (apply visit state (lookup/build-request-details state selector)))
+  (apply visit state (impl/build-request-details state selector)))
 
 (defn follow [state selector]
-  (visit state (lookup/find-url state selector)))
+  (visit state (impl/find-url state selector)))
 
 (defn follow-redirect [state]
-  (lookup/include-parse (peridot/follow-redirect state)))
+  (impl/include-parse (peridot/follow-redirect state)))
 
 (def session peridot/session)
 
 (defmacro within [state selector & fns]
-  `(lookup/using ~state ~selector #(-> % ~@fns)))
+  `(impl/using ~state ~selector #(-> % ~@fns)))
 
 (defn attach-file [state selector file]
-  (lookup/set-value state selector file))
+  (impl/set-value state selector file))
