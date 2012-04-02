@@ -86,11 +86,12 @@
        query-string))
 
 (defn get-value [state selector]
-  (-> (:enlive state)
-      (form-element-for selector)
-      first
-      :attrs
-      :value))
+  (or (-> (:enlive state)
+          (form-element-for selector)
+          first
+          :attrs
+          :value)
+      ""))
 
 (defn set-value [state selector input]
   (update-in state [:enlive]

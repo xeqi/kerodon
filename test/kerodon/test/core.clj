@@ -19,7 +19,7 @@
      {:get (fn [{:keys [session]}]
              (if-let [user (:user session)]
                (response/response (str "hi " user))
-               (response/response (hiccup/html [:a {:href "/login"} "login"]))))}
+               (response/response (hiccup/html [:a {:id "go-login" :href "/login"} "login"]))))}
      ["login"]
      {:get (constantly
             (response/response
@@ -117,6 +117,7 @@
             (response/response
              (hiccup/html
               [:form {:enctype "multipart/form-data"}
+               [:label {:for "file"} "File"]
                [:input {:id "file" :name "file" :type "file"}]
                [:input {:type "submit" :value "upload"}]])))
       :post (fn [{:keys [params body]}]
@@ -172,6 +173,12 @@
           #"link could not be found with selector \"NonExistant\""
           (follow state "NonExistant")))))
 
+(deftest follow-by-css
+  (-> (session app)
+      (visit "/")
+      (follow [:#go-login])
+      (has (text? "UserPassword"))))
+
 (deftest form-by-css
   (-> (session app)
       (visit "/login-with-css")
@@ -226,7 +233,7 @@
       (within [:#2]
               (has (value? "User" "someone")))
       (within [:#1]
-              (has (value? "User" nil)))
+              (has (value? "User" "")))
       (within [:#2]
               (press "Login"))
       (has (text? "hi"))))
@@ -248,6 +255,16 @@
   (-> (session upload-app)
       (visit "/upload")
       (attach-file [:#file] (io/file (io/resource "file.txt")))
+      (press "upload")
+      (doto
+          (#(is (re-find #"multipart/form-data;"
+                         (:content-type (:request %))))))
+      (has (text? "hi from uploaded file\n"))))
+
+(deftest attach-file-by-label
+  (-> (session upload-app)
+      (visit "/upload")
+      (attach-file "File" (io/file (io/resource "file.txt")))
       (press "upload")
       (doto
           (#(is (re-find #"multipart/form-data;"
