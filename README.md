@@ -26,30 +26,33 @@ kerodon is available from [clojars](http://clojars.org).
 ### Example
 
 ```clojure
-(use '[kerodon.core])
-(use '[kerodon.test])
-(require '[clojure.java.io :as io])
+(ns myapp.test.integration
+  (:use [kerodon.core]
+        [kerodon.test]
+        [clojure.test])
+  (:require [clojure.java.io :as io]))
 
-;imagine ring-app is a login required picture upload
-(-> (session ring-app) 
-    (visit "/")
-    (follow "login")
-    (fill-in "User:" "username")
-    (fill-in "Password:" "wrong-password")
-    (press "Login")
-    (follow-redirect)
-    (within [:#user_name]
-      (has (text? "username")
-           "Username shows up in #user_name when logged in"))
-    (press "Login")
-    (follow "update profile")
-    (has (value? "Email:" "example@example.org")
-         "Email field defaults to user's email")
-    (attach-file "Picture:" (io/file "/tmp/foo.png"))
-    (follow-redirect)
-    (within [:#picture]
-      (has (text? "foo.png")
-           "Picture name is near picture.")))
+(deftest user-can-login-and-upload-picture
+  ;imagine ring-app is a login required picture upload
+  (-> (session ring-app) 
+      (visit "/")
+      (follow "login")
+      (fill-in "User:" "username")
+      (fill-in "Password:" "wrong-password")
+      (press "Login")
+      (follow-redirect)
+      (within [:#user_name]
+        (has (text? "username")
+             "Username shows up in #user_name when logged in"))
+      (press "Login")
+      (follow "update profile")
+      (has (value? "Email:" "example@example.org")
+           "Email field defaults to user's email")
+      (attach-file "Picture:" (io/file "/tmp/foo.png"))
+      (follow-redirect)
+      (within [:#picture]
+        (has (text? "foo.png")
+             "Picture name is near picture."))))
 ```
 
 ### Interaction
