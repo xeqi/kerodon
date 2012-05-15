@@ -1,6 +1,6 @@
-(defproject kerodon "0.0.5-SNAPSHOT"
-  :description "Acceptance test framework for web applications"
-  :url "https://github.com/xeqi/kerodon"
+(defproject org.clojars.wjlroe/kerodon "0.0.6-SNAPSHOT"
+  :description "Acceptance test framework for web applications. wjlroe's fork with missing? helper"
+  :url "https://github.com/wjlroe/kerodon"
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [peridot "0.0.5"]
