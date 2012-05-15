@@ -41,3 +41,13 @@
              #(impl/get-value % ~selector)
              ~expected
              (~'value? ~selector ~expected)))
+
+(defn missing? [state selector]
+  (let [value (enlive/select (:enlive state) selector)]
+    (clojure.test/do-report {:actual (count value)
+                             :type (if (empty? value)
+                                     :pass
+                                     :fail)
+                             :message "Should have matched zero elements"
+                             :expected 0})
+    state))
