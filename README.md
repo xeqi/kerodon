@@ -41,6 +41,7 @@ kerodon is available from [clojars](http://clojars.org).
       (fill-in "Password:" "wrong-password")
       (press "Login")
       (follow-redirect)
+      (missing? [:#no-such-element])
       (within [:#user_name]
         (has (text? "username")
              "Username shows up in #user_name when logged in"))
@@ -52,7 +53,9 @@ kerodon is available from [clojars](http://clojars.org).
       (follow-redirect)
       (within [:#picture]
         (has (text? "foo.png")
-             "Picture name is near picture."))))
+             "Picture name is near picture."))
+      (within [:#content]
+        (missing? [:#navigation]))))
 ```
 
 ### Interaction
