@@ -278,3 +278,14 @@
       (attach-file [:#file] (io/file (io/resource "file.txt")))
       (press "upload")
       (has (text? "name hi from uploaded file\n"))))
+
+(deftest missing-selector
+  (-> (session app)
+      (visit "/login")
+      (missing? [:#no-such-element])))
+
+(deftest missing-selector-within-scope
+  (-> (session app)
+      (visit "/login")
+      (within [:body]
+              (missing? [:title]))))
