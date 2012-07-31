@@ -158,7 +158,9 @@
       (press "Login")
       (follow-redirect)
       (has (text? "hi someone")
-           "press sends form fields to action url")))
+           "press sends form fields to action url")
+      (has (missing? [:#go-login])
+           "Signed in user should not see login link")))
 
 (deftest selector-not-found
   (let [state (-> (session app)
@@ -285,3 +287,14 @@
       (attach-file [:#file] (io/file (io/resource "file.txt")))
       (press "upload")
       (has (text? "name hi from uploaded file\n"))))
+
+(deftest missing-selector
+  (-> (session app)
+      (visit "/login")
+      (has (missing? [:#no-such-element]))))
+
+(deftest missing-selector-within-scope
+  (-> (session app)
+      (visit "/login")
+      (within [:body]
+              (has (missing? [:title])))))

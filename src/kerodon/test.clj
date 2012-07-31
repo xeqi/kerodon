@@ -42,6 +42,12 @@
              ~expected
              (~'value? ~selector ~expected)))
 
+(defmacro missing? [selector]
+  `(validate =
+             #(count (enlive/select (:enlive %) ~selector))
+             0
+             (~'missing? ~selector)))
+
 (defmacro attr? [selector attr expected]
   `(validate =
              #(impl/get-attr % ~selector ~attr)
