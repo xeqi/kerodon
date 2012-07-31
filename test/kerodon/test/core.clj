@@ -251,6 +251,12 @@
       (within [:title]
               (has (text? "some title")))))
 
+(deftest test-attrs
+  (-> (session app)
+      (visit "/login-x2")
+      (within [:div]
+              (has (attr? [:form] :id "1")))))
+
 (deftest attach-file-alone
   (-> (session upload-app)
       (visit "/upload")

@@ -41,3 +41,9 @@
              #(impl/get-value % ~selector)
              ~expected
              (~'value? ~selector ~expected)))
+
+(defmacro attr? [selector attr expected]
+  `(validate =
+             #(impl/get-attr % ~selector ~attr)
+             ~expected
+             (~'attr? ~selector ~attr ~expected)))
