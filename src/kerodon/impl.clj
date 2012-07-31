@@ -94,13 +94,11 @@
       ""))
 
 (defn get-attr [state selector attr]
-  (do
-    (println "selector: " selector "attr:" attr)
-    (-> (:enlive state)
-        (enlive/select selector)
-        first
-        :attrs
-        (get attr))))
+  (-> (:enlive state)
+      (enlive/select selector)
+      first
+      :attrs
+      (get attr)))
 
 (defn set-value [state selector input]
   (update-in state [:enlive]
