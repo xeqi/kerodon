@@ -34,7 +34,7 @@ kerodon is available from [clojars](http://clojars.org).
 
 (deftest user-can-login-and-upload-picture
   ;imagine ring-app is a login required picture upload
-  (-> (session ring-app) 
+  (-> (session ring-app)
       (visit "/")
       (follow "login")
       (fill-in "User:" "username")
@@ -47,6 +47,7 @@ kerodon is available from [clojars](http://clojars.org).
              "Username shows up in #user_name when logged in"))
       (press "Login")
       (follow "update profile")
+      (has (attr? [:form] :id "profile"))
       (has (value? "Email:" "example@example.org")
            "Email field defaults to user's email")
       (attach-file "Picture:" (io/file "/tmp/foo.png"))
@@ -160,7 +161,10 @@ The main function is ```has```.  It allows the verifications to compose using ->
 
 You can use ```status?``` to validate the status code of the last response.
 You can use ```text?``` to validate the text in the page.
-You can use ```value?``` to validate the value of a field.  The selector can be the text or css of a label with a for element, or the css of the field itself.
+You can use ```value?``` to validate the value of a field.  The
+selector can be the text or css of a label with a for element, or the
+css of the field itself.
+You can use ```attr?``` to validate an attribute's value.
 
 ```clojure
 (-> (session ring-app)
@@ -176,6 +180,10 @@ You can use ```value?``` to validate the value of a field.  The selector can be 
          "comments default to anonymous")
     (has (value? "comment" "")
          "comments default empty"))
+
+(-> (session ring-app)
+    (visit "/comment/new")
+    (has (attr? [:form] :class "comments")))
 ```
 
 These should all work with ```within```.

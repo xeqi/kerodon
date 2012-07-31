@@ -51,3 +51,9 @@
                              :message "Should have matched zero elements"
                              :expected 0})
     state))
+
+(defmacro attr? [selector attr expected]
+  `(validate =
+             #(impl/get-attr % ~selector ~attr)
+             ~expected
+             (~'attr? ~selector ~attr ~expected)))
