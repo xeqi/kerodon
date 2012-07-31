@@ -42,15 +42,11 @@
              ~expected
              (~'value? ~selector ~expected)))
 
-(defmacro missing? [state selector]
-  `(let [value# (enlive/select (:enlive ~state) ~selector)]
-     (clojure.test/do-report {:actual (count value#)
-                              :type (if (empty? value#)
-                                      :pass
-                                      :fail)
-                              :message "Should have matched zero elements"
-                              :expected 0})
-     ~state))
+(defmacro missing? [selector]
+  `(validate =
+             #(count (enlive/select (:enlive %) ~selector))
+             0
+             (~'missing? ~selector)))
 
 (defmacro attr? [selector attr expected]
   `(validate =
