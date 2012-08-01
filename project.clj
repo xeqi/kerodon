@@ -12,5 +12,6 @@
                                    [ring/ring-core "1.0.2"]
                                    [hiccup "1.0.0-beta1"]]
                     :resource-paths ["test-resources"]}
-             :1.4 {:dependencies [[org.clojure/clojure "1.4.0-beta4"]]}}
-  :aliases {"all" ["with-profile" "test:test,1.4"]})
+             :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}
+             :1.5 {:dependencies [[org.clojure/clojure "1.5.0-alpha3"]]}}
+  :aliases {"all" ["with-profile" "test:test,1.4:test,1.5"]})
