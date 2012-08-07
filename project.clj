@@ -1,7 +1,9 @@
-(defproject kerodon "0.0.5-SNAPSHOT"
+(defproject kerodon "0.0.5"
   :description "Acceptance test framework for web applications"
   :url "https://github.com/xeqi/kerodon"
   :min-lein-version "2.0.0"
+  :license {:name "Eclipse Public License"
+            :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [peridot "0.0.5"]
                  [enlive "1.0.0" :exclusions [org.clojure/clojure]]]
