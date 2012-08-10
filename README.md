@@ -8,7 +8,7 @@ kerodon is available from [clojars](http://clojars.org).
 
 ### Leiningen
 ```clojure
-[kerodon "0.0.5"]
+[kerodon "0.0.6"]
 ```
 
 ### Maven (requires adding clojars repo):
@@ -17,7 +17,7 @@ kerodon is available from [clojars](http://clojars.org).
 <dependency>
   <groupId>kerodon</groupId>
   <artifactId>kerodon</artifactId>
-  <version>0.0.5</version>
+  <version>0.0.6</version>
 </dependency>
 ```
 
