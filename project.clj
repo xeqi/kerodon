@@ -1,11 +1,11 @@
-(defproject kerodon "0.0.6-SNAPSHOT"
+(defproject kerodon "0.0.6"
   :description "Acceptance test framework for web applications"
   :url "https://github.com/xeqi/kerodon"
   :min-lein-version "2.0.0"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.3.0"]
-                 [peridot "0.0.5"]
+                 [peridot "0.0.6"]
                  [enlive "1.0.0" :exclusions [org.clojure/clojure]]]
   :profiles {:test {:dependencies [[net.cgrand/moustache "1.1.0"
                                     :exclusions
