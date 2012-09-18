@@ -55,7 +55,7 @@
                  selector "\"")))))
 
 (defn name-from-element [elem]
-  (if (= :input (:tag elem))
+  (if (some #{(:tag elem)} [:input :textarea])
     (:name (:attrs elem))
     (:for (:attrs elem))))
 
