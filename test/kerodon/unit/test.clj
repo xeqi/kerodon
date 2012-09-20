@@ -29,7 +29,11 @@
                                  [:input {:id "user-id"
                                           :type "text"
                                           :name "user"
-                                          :value "user-value"}]])}]
+                                          :value "user-value"}]
+                                 [:label {:for "area"} "Area"]
+                                 [:textarea {:id "area-id"
+                                             :name "area"
+                                             :value "area-value"}]])}]
       (testing "fails if value is wrong"
         (check-report {:type :fail
                        :expected '(value? "User" 3)

@@ -108,7 +108,9 @@
                                      name-from-element
                                      form-element-by-name)
                                  (fn [snode]
-                                   (assoc-in snode [:attrs :value] input))))))
+                                   (if (= (:tag snode) :textarea)
+                                     (assoc-in snode [:content] [input])
+                                     (assoc-in snode [:attrs :value] input)))))))
 
 (defn find-url [state selector]
   (-> (:enlive state)
@@ -138,8 +140,10 @@
         url (or (:action (:attrs form))
                 (build-url (:request state)))
         params (into {}
-                     (map (comp (juxt (comp str :name)
-                                      :value) :attrs)
+                     (map (juxt (comp str :name :attrs)
+                                #(if (= (:tag %) :textarea)
+                                   (first (:content %))
+                                   (:value (:attrs %))))
                           (enlive/select form
                                          [fillable])))]
     [url :request-method method :params params]))

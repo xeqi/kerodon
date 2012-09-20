@@ -11,8 +11,8 @@
                                     :exclusions
                                     [[org.clojure/clojure]
                                      [ring/ring-core]]]
-                                   [ring/ring-core "1.0.2"]
-                                   [hiccup "1.0.0-beta1"]]
+                                   [ring/ring-core "1.1.5"]
+                                   [hiccup "1.0.1"]]
                     :resource-paths ["test-resources"]}
              :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}
              :1.5 {:dependencies [[org.clojure/clojure "1.5.0-alpha3"]]}}

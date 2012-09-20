@@ -22,6 +22,12 @@
       :attrs
       :value))
 
+(defn get-content [state css]
+  (-> (:enlive state)
+      (enlive/select css)
+      first
+      :content))
+
 (deftest test-session
   (testing "session returns state with the app"
     (is (= (:app (session :x)) :x))))
@@ -80,7 +86,7 @@
       (is (= "x" (get-value state [:#password-id])))))
   (testing "for text area changes :enlive form"
     (let [state (fill-in state textarea "x")]
-      (is (= "x" (get-value state [:#textarea-id]))))))
+      (is (= ["x"] (get-content state [:#textarea-id]))))))
 
 (deftest test-fill-in
   (testing "fill-in"
@@ -121,8 +127,8 @@
                                         :value "password-value"}]
                                [:label {:for "area"} "Area"]
                                [:textarea {:id "textarea-id"
-                                           :name "area"
-                                           :value "area-value"}]
+                                           :name "area"}
+                                "area-value"]
                                [:input {:id "submit-id"
                                         :type "submit"
                                         :value "Login"}]])
