@@ -8,7 +8,7 @@ kerodon is available from [clojars](http://clojars.org).
 
 ### Leiningen
 ```clojure
-[kerodon "0.0.6"]
+[kerodon "0.0.7"]
 ```
 
 ### Maven (requires adding clojars repo):
@@ -17,7 +17,7 @@ kerodon is available from [clojars](http://clojars.org).
 <dependency>
   <groupId>kerodon</groupId>
   <artifactId>kerodon</artifactId>
-  <version>0.0.6</version>
+  <version>0.0.7</version>
 </dependency>
 ```
 
@@ -205,7 +205,7 @@ kerodon runs without an http server and, depending on your setup, transactions c
 
 ## Building
 
-[leiningen](https://github.com/technomancy/leiningen) version 2 is used as the build tool.  ```lein2 all test``` will run the test suite against clojure 1.3 and a recent 1.4-beta.
+[leiningen](https://github.com/technomancy/leiningen) version 2 is used as the build tool.  ```lein2 all test``` will run the test suite against clojure 1.3, 1.4, and a recent 1.5-alpha.
 
 ## License
 
