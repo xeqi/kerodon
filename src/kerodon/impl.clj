@@ -1,6 +1,7 @@
 (ns kerodon.impl
   (:require [net.cgrand.enlive-html :as enlive]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [clojure.java.io :as io])
   (:import java.io.StringReader))
 
 ;; selectors
@@ -67,11 +68,22 @@
 
 ;; state manipulation
 
+
+(defprotocol ToHtmlResource
+  (to-html-resource [obj]))
+
+(extend-protocol ToHtmlResource
+  clojure.lang.ISeq
+  (to-html-resource [s]  (to-html-resource (apply str s)))
+  String
+  (to-html-resource [str] (enlive/html-resource (StringReader. str)))
+  Object
+  (to-html-resource [o] (enlive/html-resource o)))
+
 (defn include-parse [state]
   (assoc state
     :enlive (when-let [body (:body (:response state))]
-              (enlive/html-resource
-               (StringReader. body)))))
+              (to-html-resource body))))
 
 ;TODO: merge w/ peridot
 (defn build-url
