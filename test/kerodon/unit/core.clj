@@ -45,7 +45,8 @@
                        :query-string nil
                        :scheme :http
                        :request-method :get
-                       :headers {"host" "localhost"}}]
+                       :headers {"host" "localhost"}
+                       :body nil}]
           (is (= request (:request state))))))))
 
 (defn test-follow-method [state selector]
@@ -60,7 +61,8 @@
                        :query-string nil
                        :scheme :http
                        :request-method :get
-                       :headers {"host" "localhost"}}]
+                       :headers {"host" "localhost"}
+                       :body nil}]
           (is (= request (:request state)))))))
 
 (deftest test-follow
@@ -260,10 +262,10 @@
                 (is (= request (-> (:request state)
                                    (dissoc :body)
                                    (dissoc :content-type)
-                                   (update-in [:headers] dissoc :content-type)
+                                   (update-in [:headers] dissoc "content-type")
                                    (dissoc :content-length)
                                    (update-in [:headers] dissoc
-                                              :content-length))))
+                                              "content-length"))))
                 (is (re-find #"multipart/form-data;" (:content-type
                                                       (:request state)))))))
           (testing "by css"
@@ -272,10 +274,10 @@
                 (is (= request (-> (:request state)
                                    (dissoc :body)
                                    (dissoc :content-type)
-                                   (update-in [:headers] dissoc :content-type)
+                                   (update-in [:headers] dissoc "content-type")
                                    (dissoc :content-length)
                                    (update-in [:headers] dissoc
-                                              :content-length))))
+                                              "content-length"))))
                 (is (re-find #"multipart/form-data;" (:content-type
                                                       (:request state))))))))))))
 
@@ -302,7 +304,8 @@
                      :server-name "localhost"
                      :headers {"host" "localhost"
                                "referrer" "http://localhost/"}
-                     :server-port 80}]
+                     :server-port 80
+                     :body nil}]
         (is (= request (:request (follow-redirect state))))))
     (testing "throws error if previous response was not a redirect"
       (let [state {:app (constantly :x)
