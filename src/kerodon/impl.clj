@@ -156,6 +156,9 @@
                                 #(if (= (:tag %) :textarea)
                                    (first (:content %))
                                    (:value (:attrs %))))
-                          (enlive/select form
-                                         [fillable])))]
+                          (filter #(not (and
+                                         (= "checkbox" (:type (:attrs %)))
+                                         (nil? (:value (:attrs %)))))
+                                  (enlive/select form
+                                          [fillable]))))]
     [url :request-method method :params params]))
