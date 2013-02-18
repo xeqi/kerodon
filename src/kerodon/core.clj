@@ -4,8 +4,13 @@
 
 (def session peridot/session)
 
-(defn visit [state & rest]
-  (impl/include-parse (apply peridot/request state rest)))
+(defn- resolve-uri [state uri]
+  (if-let [request (:request state)]
+    (str (.resolve (java.net.URI. (peridot.request/url request)) uri))
+    uri))
+
+(defn visit [state uri & rest]
+  (impl/include-parse (apply peridot/request state (resolve-uri state uri) rest)))
 
 (defn follow-redirect [state]
   (impl/include-parse (peridot/follow-redirect state)))
