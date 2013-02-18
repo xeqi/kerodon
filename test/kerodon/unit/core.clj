@@ -2,7 +2,8 @@
   (:use [kerodon.core]
         [clojure.test]
         [kerodon.test])
-  (:require [net.cgrand.moustache :as moustache]
+  (:require [peridot.request :as request]
+            [net.cgrand.moustache :as moustache]
             [ring.util.response :as response]
             [ring.middleware.params :as params]
             [ring.middleware.session :as session]
@@ -47,7 +48,21 @@
                        :request-method :get
                        :headers {"host" "localhost"}
                        :body nil}]
-          (is (= request (:request state))))))))
+          (is (= request (:request state)))))
+      (testing "resolves relative links against the URI of the last request"
+        (-> (session #(response/response (request/url %)))
+            (visit "http://example.com/foo/bar")
+            (has (text? "http://example.com/foo/bar"))
+            (visit "/fuz/buz")
+            (has (text? "http://example.com/fuz/buz"))
+            (visit "cats")
+            (has (text? "http://example.com/fuz/cats"))
+            (visit "/dogs/")
+            (has (text? "http://example.com/dogs/"))
+            (visit "fish")
+            (has (text? "http://example.com/dogs/fish"))
+            (visit "https://www.example.com/carbs")
+            (has (text? "https://www.example.com/carbs")))))))
 
 (defn test-follow-method [state selector]
   (let [state (follow state selector)]
