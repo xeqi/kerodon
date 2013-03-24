@@ -1,6 +1,6 @@
 # kerodon [![Build Status](https://secure.travis-ci.org/xeqi/kerodon.png)](http://travis-ci.org/xeqi/kerodon)
 
-kerodon is an interaction and testing library for [ring](https://github.com/mmcgrana/ring) html based apps. It is intented to look like the interaction a user would have.  It is inspired by [capybara](https://github.com/jnicklas/capybara).
+kerodon is an interaction and testing library for [ring](https://github.com/ring-clojure/ring) html based apps. It is intented to look like the interaction a user would have.  It is inspired by [capybara](https://github.com/jnicklas/capybara).
 
 ## Dependency Information
 
@@ -8,7 +8,7 @@ kerodon is available from [clojars](http://clojars.org).
 
 ### Leiningen
 ```clojure
-[kerodon "0.0.7"]
+[kerodon "0.1.0"]
 ```
 
 ### Maven (requires adding clojars repo):
@@ -17,7 +17,7 @@ kerodon is available from [clojars](http://clojars.org).
 <dependency>
   <groupId>kerodon</groupId>
   <artifactId>kerodon</artifactId>
-  <version>0.0.7</version>
+  <version>0.1.0</version>
 </dependency>
 ```
 
@@ -38,20 +38,20 @@ kerodon is available from [clojars](http://clojars.org).
       (visit "/")
       (follow "login")
       (fill-in "User:" "username")
-      (fill-in "Password:" "wrong-password")
+      (fill-in "Password:" "password")
       (press "Login")
       (follow-redirect)
-      (has (missing? [:#no-such-element]) "User shouldn't see the no-such-element")
-      (within [:#user_name]
-        (has (text? "username")
-             "Username shows up in #user_name when logged in"))
-      (press "Login")
+      (has (missing? [:#no-such-element])
+           "User shouldn't see the no-such-element")
+
       (follow "update profile")
       (has (attr? [:form] :id "profile"))
       (has (value? "Email:" "example@example.org")
            "Email field defaults to user's email")
       (attach-file "Picture:" (io/file "/tmp/foo.png"))
+      (press "update")
       (follow-redirect)
+
       (within [:#picture]
         (has (text? "foo.png")
              "Picture name is near picture."))
@@ -205,10 +205,10 @@ kerodon runs without an http server and, depending on your setup, transactions c
 
 ## Building
 
-[leiningen](https://github.com/technomancy/leiningen) version 2 is used as the build tool.  ```lein2 all test``` will run the test suite against clojure 1.3, 1.4, and a recent 1.5-alpha.
+[leiningen](https://github.com/technomancy/leiningen) version 2 is used as the build tool.  ```lein2 all test``` will run the test suite against clojure 1.3, 1.4, 1.5.
 
 ## License
 
-Copyright (C) 2012 Nelson Morris and [contributors](https://github.com/xeqi/kerodon/graphs/contributors)
+Copyright (C) 2013 Nelson Morris and [contributors](https://github.com/xeqi/kerodon/graphs/contributors)
 
 Distributed under the Eclipse Public License, the same as Clojure.
