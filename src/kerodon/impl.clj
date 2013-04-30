@@ -9,7 +9,8 @@
   #{[:input
      (enlive/but
       (enlive/attr-has :type "submit"))]
-    :textarea})
+    :textarea
+    :select})
 
 (defn form-element-by-name [name]
   [:form (enlive/attr-has :name name)])
@@ -23,6 +24,14 @@
   (if (string? selector)
     (enlive/attr= :value selector)
     selector))
+
+(defn- value-from-form-element [element]
+  (case (:tag element)
+    :textarea (first (:content element))
+    ; TODO: handle actually chosing values from select elements
+    :select (-> (enlive/select element [:option])
+                first :attrs :value)
+    (:value (:attrs element))))
 
 ;; finders
 (defn form-with-submit [node selector]
@@ -153,9 +162,7 @@
                 (build-url (:request state)))
         params (into {}
                      (map (juxt (comp str :name :attrs)
-                                #(if (= (:tag %) :textarea)
-                                   (first (:content %))
-                                   (:value (:attrs %))))
+                                value-from-form-element)
                           (enlive/select form
                                          [fillable])))]
     [url :request-method method :params params]))
