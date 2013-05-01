@@ -5,12 +5,6 @@
   (:import java.io.StringReader))
 
 ;; selectors
-(def fillable
-  #{[:input
-     (enlive/but
-      (enlive/attr-has :type "submit"))]
-    :textarea
-    :select})
 
 (defn form-element-by-name [name]
   [:form (enlive/attr-has :name name)])
@@ -24,14 +18,6 @@
   (if (string? selector)
     (enlive/attr= :value selector)
     selector))
-
-(defn- value-from-form-element [element]
-  (case (:tag element)
-    :textarea (first (:content element))
-    ; TODO: handle actually chosing values from select elements
-    :select (-> (enlive/select element [:option])
-                first :attrs :value)
-    (:value (:attrs element))))
 
 ;; finders
 (defn form-with-submit [node selector]
@@ -155,14 +141,60 @@
                                     (constantly (:enlive new-state))))
       new-state)))
 
+;; Reading Form
+
+(defn field-name
+  "Get the name attribute for a form field"
+  [field] (get-in field [:attrs :name]))
+
+(defmulti field->param
+  "Get key-value pair for this form field, or nil if it should be ignored"
+  :tag)
+
+(defmethod field->param :textarea
+  [field] [(field-name field) (first (:content field))])
+
+(defn- selected-option
+  "Get the option that is considered selected"
+  [options]
+  (first
+    (or (seq (enlive/select options [(enlive/attr? :selected)]))
+        options)))
+
+(defn- option-value
+  "Get the real value of an <option> element"
+  [option]
+  (if-let [value (get-in option [:attrs :value])]
+    value
+    (first (:content option))))
+
+(defmethod field->param :select
+  [field] [(field-name field)
+           (-> (enlive/select field [:option])
+               (selected-option)
+               (option-value))])
+
+(declare input->param)
+(defmethod field->param :input
+  [field] (input->param field))
+
+(defmulti input->param
+  "Get key-value pair for types of <input>, or nil if it should be ignored"
+  #(-> % :attrs :type))
+
+(defmethod input->param :default
+  [field]
+  [(field-name field) (get-in field [:attrs :value])])
+
+(defn all-form-params [form]
+  (into {} (map field->param
+                (enlive/select form [[#{:input :textarea :select}
+                                      (enlive/attr? :name)]]))))
+
 (defn build-request-details [state selector]
   (let [form (form-with-submit (:enlive state) selector)
         method (keyword (string/lower-case (:method (:attrs form) "post")))
         url (or (not-empty (:action (:attrs form)))
                 (build-url (:request state)))
-        params (into {}
-                     (map (juxt (comp str :name :attrs)
-                                value-from-form-element)
-                          (enlive/select form
-                                         [fillable])))]
+        params (all-form-params form)]
     [url :request-method method :params params]))
