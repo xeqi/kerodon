@@ -1,7 +1,9 @@
 (ns kerodon.impl
   (:require [net.cgrand.enlive-html :as enlive]
             [clojure.string :as string]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [ring.util.codec :as codec]
+            [flatland.ordered.map :as om])
   (:import java.io.StringReader))
 
 ;; selectors
@@ -143,23 +145,19 @@
 
 ;; Reading Form
 
-(defn field-name
-  "Get the name attribute for a form field"
-  [field] (get-in field [:attrs :name]))
-
-(defmulti field->param
-  "Get key-value pair for this form field, or nil if it should be ignored"
+(defmulti field->value
+  "Get the value of the form field, or nil if it should be ignored"
   :tag)
 
-(defmethod field->param :textarea
-  [field] [(field-name field) (first (:content field))])
+(defmethod field->value :textarea
+  ;; A textarea's child content is its value
+  [field] (-> field :content first str))
 
-(defn- selected-option
-  "Get the option that is considered selected"
-  [options]
-  (first
-    (or (seq (enlive/select options [(enlive/attr? :selected)]))
-        options)))
+(defn- selected-options
+  "Get the <select> options that are considered selected"
+  [options select-by-default]
+  (or (seq (enlive/select options [(enlive/attr? :selected)]))
+      (when select-by-default [(first options)])))
 
 (defn- option-value
   "Get the real value of an <option> element"
@@ -168,28 +166,61 @@
     value
     (first (:content option))))
 
-(defmethod field->param :select
-  [field] [(field-name field)
-           (-> (enlive/select field [:option])
-               (selected-option)
-               (option-value))])
-
-(declare input->param)
-(defmethod field->param :input
-  [field] (input->param field))
-
-(defmulti input->param
-  "Get key-value pair for types of <input>, or nil if it should be ignored"
-  #(-> % :attrs :type))
-
-(defmethod input->param :default
+(defmethod field->value :select
+  ;; Single selects have the first element selected by default
+  ;; Multiple selects do not have anything selected by default
   [field]
-  [(field-name field) (get-in field [:attrs :value])])
+  (let [single (not (contains? (:attrs field) :multiple))]
+    (-> (enlive/select field [:option])
+        (selected-options single)
+        (->> (map option-value))
+        ((fn [values] (if single (first values) (seq values)))))))
+
+(declare input->value)
+(defmethod field->value :input
+  ;; Delegate input field handling to a second multimethod
+  [field] (input->value field))
+
+(defn- ns-keyword [name]
+  (when name (keyword "kerodon.impl" name)))
+
+(defmulti input->value
+  "Get the value for each type of <input>, or nil if it should be ignored"
+  #(-> % :attrs :type ns-keyword))
+
+(derive ::checkbox ::box)
+(derive ::radio ::box)
+
+(defmethod input->value ::box
+  ;;Radios and checkboxes only send their value when they are checked
+  ;; The spec says no value is undefined, but de-facto standard is "on"
+  [field]
+  (when (contains? (:attrs field) :checked)
+    (get-in field [:attrs :value] "on")))
+
+(defmethod input->value ::file
+  ;; File inputs should not be coerced into strings
+  [field]
+  (get-in field [:attrs :value]))
+
+(defmethod input->value :default
+  ;; Any input not specified is treated as text input and stringified
+  [field]
+  (str (get-in field [:attrs :value])))
+
+(defn field-name
+  "Get the name attribute for a form field"
+  [field] (get-in field [:attrs :name]))
 
 (defn all-form-params [form]
-  (into {} (map field->param
-                (enlive/select form [[#{:input :textarea :select}
-                                      (enlive/attr? :name)]]))))
+  (reduce (fn [params field]
+            (if-let [value (field->value field)]
+              (codec/assoc-conj params (field-name field) value)
+              params))
+          (om/ordered-map)
+          (enlive/select form [[#{:input :textarea :select}
+                                (enlive/but (enlive/attr? :disabled))
+                                (enlive/attr? :name)]])))
 
 (defn build-request-details [state selector]
   (let [form (form-with-submit (:enlive state) selector)
