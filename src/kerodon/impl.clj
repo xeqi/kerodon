@@ -158,7 +158,7 @@
 (defn build-request-details [state selector]
   (let [form (form-with-submit (:enlive state) selector)
         method (keyword (string/lower-case (:method (:attrs form) "post")))
-        url (or (:action (:attrs form))
+        url (or (not-empty (:action (:attrs form)))
                 (build-url (:request state)))
         params (into {}
                      (map (juxt (comp str :name :attrs)

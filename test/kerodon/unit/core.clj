@@ -192,7 +192,9 @@
               t #(is (= query (slurp %)))]
           (test-press-method {:action "/login"} request t)
           (testing "or action"
-            (test-press-method {} request t))))
+            (test-press-method {} request t))
+          (testing "empty action"
+            (test-press-method {:action ""} request t))))
       (testing "with method :post"
         (let [request {:remote-addr "localhost"
                        :scheme :http
@@ -210,7 +212,9 @@
               t #(is (= query (slurp %)))]
           (test-press-method {:action "/login" :method :post} request t)
           (testing "without action"
-            (test-press-method {:method :post} request t))))
+            (test-press-method {:method :post} request t))
+          (testing "empty action"
+            (test-press-method {:action "" :method :post} request t))))
       (testing "with method :get"
         (let [request {:remote-addr "localhost"
                        :scheme :http
@@ -223,7 +227,9 @@
               t (fn [x])]
           (test-press-method {:action "/login" :method :get} request t)
           (testing "without action"
-            (test-press-method {:method :get} request t))))
+            (test-press-method {:method :get} request t))
+          (testing "empty action"
+            (test-press-method {:action "" :method :get} request t))))
 
       (testing "with file input"
         (let [state {:app (constantly :x)
