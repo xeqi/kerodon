@@ -146,6 +146,15 @@
                                [:textarea {:id "textarea-id"
                                            :name "area"}
                                 "area-value"]
+                               [:label {:for "type"} "Type"]
+                               [:select {:id "type-id"
+                                         :name "type"}
+                                [:option {:value "1"} "Normal"]
+                                [:option {:value "2"} "Special"]]
+                               [:select {:id "duration-id"
+                                         :name "duration"}
+                                [:option "Day"]
+                                [:option {:selected true} "Week"]]
                                [:input {:id "submit-id"
                                         :type "submit"
                                         :value "Login"}]])
@@ -174,7 +183,8 @@
 
 (deftest test-press
   (testing "press"
-    (let [query "user=user-value&password=password-value&area=area-value"]
+    (let [query (str "user=user-value&password=password-value&"
+                     "area=area-value&type=1&duration=Week")]
       (testing "without method"
         (let [request {:remote-addr "localhost"
                        :scheme :http
@@ -183,11 +193,11 @@
                        :content-type "application/x-www-form-urlencoded"
                        :uri "/login"
                        :server-name "localhost"
-                       :headers {"content-length" "55"
+                       :headers {"content-length" (str (count query))
                                  "content-type"
                                  "application/x-www-form-urlencoded"
                                  "host" "localhost"}
-                       :content-length 55
+                       :content-length (count query)
                        :server-port 80}
               t #(is (= query (slurp %)))]
           (test-press-method {:action "/login"} request t)
@@ -203,11 +213,11 @@
                        :content-type "application/x-www-form-urlencoded"
                        :uri "/login"
                        :server-name "localhost"
-                       :headers {"content-length" "55"
+                       :headers {"content-length" (str (count query))
                                  "content-type"
                                  "application/x-www-form-urlencoded"
                                  "host" "localhost"}
-                       :content-length 55
+                       :content-length (count query)
                        :server-port 80}
               t #(is (= query (slurp %)))]
           (test-press-method {:action "/login" :method :post} request t)
