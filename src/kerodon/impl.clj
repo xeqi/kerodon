@@ -64,15 +64,17 @@
                  selector "\"")))))
 
 (defn name-from-element [elem]
-  (if (some #{(:tag elem)} [:input :textarea])
-    (:name (:attrs elem))
-    (:for (:attrs elem))))
+  (if (= :label (:tag elem))
+    (:for (:attrs elem))
+    (:name (:attrs elem))))
+
+(defn form-element-query [node selector]
+  (-> (form-element node selector)
+      name-from-element
+      form-element-by-name))
 
 (defn form-element-for [node selector]
-  (enlive/select node
-                 (-> (form-element node selector)
-                     name-from-element
-                     form-element-by-name)))
+  (enlive/select node (form-element-query node selector)))
 
 ;; state manipulation
 
@@ -124,13 +126,39 @@
   (update-in state [:enlive]
              (fn [node]
                (enlive/transform node
-                                 (-> (form-element node selector)
-                                     name-from-element
-                                     form-element-by-name)
+                                 (form-element-query node selector)
                                  (fn [snode]
                                    (if (= (:tag snode) :textarea)
                                      (assoc-in snode [:content] [input])
                                      (assoc-in snode [:attrs :value] input)))))))
+
+(defn- option=
+  "Enlive selector for options with matching content or value"
+  [option]
+  [[:option #{(enlive/pred #(= [option] (:content %)))
+              (enlive/attr= :value option)}]])
+
+(defn- mark-option-selected [option]
+  (fn [select-node]
+    (when (empty? (enlive/select select-node (option= option)))
+      (throw
+        (IllegalArgumentException.
+          (format "option could not be found with selector \"%s\"" option))))
+    ; Transform requires a list of nodes, we only have one here
+    (-> (list select-node)
+        ; Deselect all options
+        (enlive/transform [:option]
+                          (enlive/remove-attr :selected))
+        ; Select the chosen option
+        (enlive/transform (option= option)
+                          (enlive/set-attr :selected "selected")))))
+
+(defn choose-value [state selector option]
+  (let [enlive (:enlive state)]
+    (assoc state :enlive
+      (enlive/transform enlive
+                        (form-element-query enlive selector)
+                        (mark-option-selected option)))))
 
 (defn find-url [state selector]
   (-> (:enlive state)
@@ -222,6 +250,7 @@
 (defn field-name
   "Get the name attribute for a form field"
   [field] (get-in field [:attrs :name]))
+
 
 (defn all-form-params [form]
   (reduce (fn [params field]

@@ -4,7 +4,7 @@
 
 (def session peridot/session)
 
-(defn- resolve-uri [state uri]
+(defn- resolve-uri [state ^String uri]
   (if-let [request (:request state)]
     (str (.resolve (java.net.URI. (peridot.request/url request)) uri))
     uri))
@@ -20,6 +20,9 @@
 
 (defn fill-in [state selector input]
   (impl/set-value state selector input))
+
+(defn choose [state selector option]
+  (impl/choose-value state selector option))
 
 (defn attach-file [state selector file]
   (impl/set-value state selector file))

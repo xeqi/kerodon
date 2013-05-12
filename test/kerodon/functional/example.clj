@@ -26,6 +26,10 @@
                            [:input {:type "text" :name "user"}]
                            [:label {:for "password"} "Password"]
                            [:input {:type "password" :name "password"}]
+                           [:label {:for "type"} "Type"]
+                           [:select {:name "type"}
+                            [:option "Administrator"]
+                            [:option "Standard"]]
                            [:input {:type "submit" :value "Login"}]])))
       :post (fn [{:keys [params]}]
               (if (and (= (params "user") "someone")
@@ -39,6 +43,7 @@
       (follow "login")
       (fill-in "User" "someone")
       (fill-in "Password" "password")
+      (choose "Type" "Standard")
       (press "Login")
       (follow-redirect)
       (has (text? "hi someone"))))

@@ -294,6 +294,70 @@
               #"field could not be found with selector \"NonExistant\""
               (fill-in state "NonExistant" "")))))))
 
+(deftest test-choose
+  (letfn [(build-state [control]
+            {:app (constantly :x)
+             :enlive (parse [:form {:action "/"} control
+                             [:input {:type "submit" :value "Submit"}]])})
+          (submit [state] (form-params state "Submit"))]
+    (testing "choose"
+      (testing "select with bare options"
+        (let [state (build-state
+                      '([:label {:for "colour"} "Colour"]
+                        [:select {:name "colour" :id "colour"}
+                         [:option "Red"]
+                         [:option "Blue"]
+                         [:option "Green"]
+                         [:option "Orange"]]))]
+          (testing "select and option by label"
+            (is (= "colour=Green"
+                   (-> state (choose "Colour" "Green") submit))))
+          (testing "select by selector, option by label"
+            (is (= "colour=Orange"
+                   (-> state (choose :#colour "Orange") submit))))
+          (testing "changing the selection"
+            (is (= "colour=Green"
+                   (-> state
+                       (choose :#colour "Blue")
+                       (choose :#colour "Green")
+                       submit))))
+          (testing "cannot find select"
+            (is (thrown-with-msg?
+                  Exception
+                  #"field could not be found with selector \"NonExistant\""
+                  (-> state (choose "NonExistant" "") submit))))
+          (testing "select by label, cannot find option"
+            (is (thrown-with-msg?
+                  Exception
+                  #"option could not be found with selector \"NonExistant\""
+                  (-> state (choose "Colour" "NonExistant") submit))))
+          ))
+      (testing "select with value options"
+        (let [state (build-state
+                      '([:label {:for "colour"} "Colour"]
+                        [:select {:name "colour" :id "colour"}
+                         [:option {:value "ff0000"} "Red"]
+                         [:option {:value "0000ff"} "Blue"]
+                         [:option {:value "00ff00"} "Green"]
+                         [:option {:value "ff6600"} "Orange"]]))]
+          (testing "select and option by label"
+            (is (= "colour=00ff00"
+                   (-> state (choose "Colour" "Green") submit))))
+          (testing "select by selector, option by label"
+            (is (= "colour=00ff00"
+                   (-> state (choose :#colour "Green") submit))))
+          (testing "select by label, option by value"
+            (is (= "colour=ff6600"
+                   (-> state (choose "Colour" "ff6600") submit))))
+          (testing "select by selector, option by value"
+            (is (= "colour=ff6600"
+                   (-> state (choose :#colour "ff6600") submit))))
+          (testing "changing the selection"
+            (is (= "colour=0000ff"
+                   (-> state
+                       (choose "Colour" "ff0000")
+                       (choose "Colour" "Blue")
+                       submit)))))))))
 
 (deftest test-follow-redirect
   (testing "follow-redirect"

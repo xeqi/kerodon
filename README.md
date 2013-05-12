@@ -101,6 +101,18 @@ You can use ```fill-in``` to fill in a form field.
 
 The selector can be the text or css of a label with a for element, or the css of the field itself.
 
+You can use ```choose``` to fill in a combo box.
+
+```clojure
+(-> (session ring-app) ;Use your ring app
+    (visit "/")
+    (follow "login")
+    (choose "Issue Type:" "Bug")
+    (choose "Parent:" "123")
+```
+
+The selector can be the text or css of a label with a for element, or the css of the field itself.
+The option argument can be the text of the option, or its value.
 
 You can use ```attach-file``` to fill in a file field.
 
