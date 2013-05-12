@@ -94,41 +94,6 @@
               #"link could not be found with selector \"NonExistant\""
               (follow state "NonExistant")))))))
 
-(defn test-fill-in-method [state user password textarea]
-  (testing "for text input changes :enlive form"
-    (let [state (fill-in state user "x")]
-      (is (= "x" (get-value state [:#user-id])))))
-  (testing "for password input changes :enlive form"
-    (let [state (fill-in state password  "x")]
-      (is (= "x" (get-value state [:#password-id])))))
-  (testing "for text area changes :enlive form"
-    (let [state (fill-in state textarea "x")]
-      (is (= ["x"] (get-content state [:#textarea-id]))))))
-
-(deftest test-fill-in
-  (testing "fill-in"
-    (let [state {:app (constantly :x)
-                 :enlive (parse [:form
-                                 [:label {:for "user"} "User"]
-                                 [:input {:id "user-id"
-                                          :type "text"
-                                          :name "user"}]
-                                 [:label {:for "password"} "Password"]
-                                 [:input {:id "password-id"
-                                          :type "password"
-                                          :name "password"}]
-                                 [:label {:for "area"} "Area"]
-                                 [:textarea {:id "textarea-id"
-                                             :name "area"}]])}]
-      (testing "by label text"
-        (test-fill-in-method state "User" "Password" "Area"))
-      (testing "by field css"
-        (test-fill-in-method state [:#user-id] [:#password-id] [:#textarea-id]))
-      (testing "not found throws exception"
-        (is (thrown-with-msg? Exception
-              #"field could not be found with selector \"NonExistant\""
-              (fill-in state "NonExistant" "")))))))
-
 (defn test-press-method [data request test-body]
   (let [state {:app (constantly :x)
                :enlive (parse [:form data
@@ -142,19 +107,6 @@
                                         :type "password"
                                         :name "password"
                                         :value "password-value"}]
-                               [:label {:for "area"} "Area"]
-                               [:textarea {:id "textarea-id"
-                                           :name "area"}
-                                "area-value"]
-                               [:label {:for "type"} "Type"]
-                               [:select {:id "type-id"
-                                         :name "type"}
-                                [:option {:value "1"} "Normal"]
-                                [:option {:value "2"} "Special"]]
-                               [:select {:id "duration-id"
-                                         :name "duration"}
-                                [:option "Day"]
-                                [:option {:selected true} "Week"]]
                                [:input {:id "submit-id"
                                         :type "submit"
                                         :value "Login"}]])
@@ -183,8 +135,7 @@
 
 (deftest test-press
   (testing "press"
-    (let [query (str "user=user-value&password=password-value&"
-                     "area=area-value&type=1&duration=Week")]
+    (let [query (str "user=user-value&password=password-value")]
       (testing "without method"
         (let [request {:remote-addr "localhost"
                        :scheme :http
@@ -244,33 +195,25 @@
       (testing "with file input"
         (let [state {:app (constantly :x)
                      :enlive (list
-                              {:tag :html
-                               :attrs nil
-                               :content
-                               (list
-                                {:tag :body
-                                 :attrs nil
-                                 :content
-                                 (list
-                                  {:tag :form
-                                   :attrs nil
-                                   :content
-                                   (list
-                                    {:tag :label
-                                     :attrs {:for "file"}
-                                     :content '("File")}
-                                    {:tag :input
-                                     :attrs {:value (proxy [java.io.File]
-                                                        ["file"])
-                                             :type "file"
-                                             :name "file"
-                                             :id "file-id"}
-                                     :content nil}
-                                    {:tag :input
-                                     :attrs {:value "Login"
-                                             :type "submit"
-                                             :id "submit-id"}
-                                     :content nil})})})})
+                               {:tag :form
+                                :attrs nil
+                                :content
+                                (list
+                                  {:tag :label
+                                   :attrs {:for "file"}
+                                   :content '("File")}
+                                  {:tag :input
+                                   :attrs {:value (proxy [java.io.File]
+                                                    ["file"])
+                                           :type "file"
+                                           :name "file"
+                                           :id "file-id"}
+                                   :content nil}
+                                  {:tag :input
+                                   :attrs {:value "Login"
+                                           :type "submit"
+                                           :id "submit-id"}
+                                   :content nil})})
                      :request {:server-port 80
                                :server-name "localhost"
                                :remote-addr "localhost"
@@ -312,6 +255,46 @@
                 (is (re-find #"multipart/form-data;" (:content-type
                                                       (:request state))))))))))))
 
+(defn form-params [state submit]
+  (-> state
+      (press submit)
+      :request :body slurp))
+
+(defn test-fill-in-helper [control label selector value result]
+  (let [state {:app (constantly :x)
+               :enlive (parse [:form {:action "/"} control
+                               [:input {:type "submit" :value "Submit"}]])}]
+    (testing "using label updates form value"
+      (let [state (fill-in state label value)]
+        (is (= result (form-params state "Submit")))))
+    (testing "using selector updates form value"
+      (let [state (fill-in state selector value)]
+        (is (= result (form-params state "Submit")))))))
+
+(deftest test-fill-in
+  (testing "fill-in"
+    (testing "text input"
+      (test-fill-in-helper '([:label {:for "user"} "User"]
+                             [:input {:type "text"
+                                      :id "user-id" :name "user"}])
+                           "User" :#user-id "x" "user=x"))
+    (testing "password input"
+      (test-fill-in-helper '([:label {:for "password"} "Password"]
+                             [:input {:type "password"
+                                      :id "password-id" :name "password"}])
+                           "Password" :#password-id "secret" "password=secret"))
+    (testing "textarea"
+      (test-fill-in-helper '([:label {:for "message"} "Message"]
+                             [:textarea {:id "message-id" :name "message"}])
+                           "Message" :#message-id "blah" "message=blah"))
+    (testing "not found throws exception"
+      (let [state {:app (constantly :x)
+                   :enlive (parse [:form [:input {:name "something"}]])}]
+        (is (thrown-with-msg? Exception
+              #"field could not be found with selector \"NonExistant\""
+              (fill-in state "NonExistant" "")))))))
+
+
 (deftest test-follow-redirect
   (testing "follow-redirect"
     (testing "sends request to redirected url"
@@ -352,29 +335,13 @@
                                  [:input {:id "file-id"
                                           :type "file"
                                           :name "file"}]])}]
-      (let [expected {:enlive
-                      '({:tag :html
-                         :attrs nil
-                         :content
-                         ({:tag :body
-                           :attrs nil
-                           :content
-                           ({:tag :form
-                             :attrs nil
-                             :content
-                             ({:tag :label
-                               :attrs {:for "file"}
-                               :content ("File")}
-                              {:tag :input
-                               :attrs {:value :x
-                                       :type "file"
-                                       :name "file"
-                                       :id "file-id"}
-                               :content ()})})})})}]
+    (letfn [(file-value [state]
+              (-> (enlive/select (:enlive state) [:input])
+                  first :attrs :value))]
         (testing "by label text"
-          (is (= expected (attach-file state "File" :x))))
+          (is (= :x (file-value (attach-file state "File" :x)))))
         (testing "by field css"
-          (is (= expected (attach-file state [:#file-id] :x)))))
+          (is (= :x (file-value (attach-file state [:#file-id] :x))))))
       (testing "not found throws exception"
         (is (thrown-with-msg? Exception
               #"field could not be found with selector \"NonExistant\""
