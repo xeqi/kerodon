@@ -2,9 +2,20 @@
   (:require [net.cgrand.enlive-html :as enlive]
             [clojure.string :as string]
             [clojure.java.io :as io]
-            [ring.util.codec :as codec]
             [flatland.ordered.map :as om])
   (:import java.io.StringReader))
+
+(defn- assoc-conj
+  "Associate a key with a value in a map. If the key already exists in the map,
+  a vector of values is associated with the key.
+  Stolen out of ring-codec."
+  [map key val]
+  (assoc map key
+    (if-let [cur (get map key)]
+      (if (vector? cur)
+        (conj cur val)
+        [cur val])
+      val)))
 
 ;; selectors
 
@@ -215,7 +226,7 @@
 (defn all-form-params [form]
   (reduce (fn [params field]
             (if-let [value (field->value field)]
-              (codec/assoc-conj params (field-name field) value)
+              (assoc-conj params (field-name field) value)
               params))
           (om/ordered-map)
           (enlive/select form [[#{:input :textarea :select}
