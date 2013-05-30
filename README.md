@@ -4,22 +4,7 @@ kerodon is an interaction and testing library for [ring](https://github.com/ring
 
 ## Dependency Information
 
-kerodon is available from [clojars](http://clojars.org).
-
-### Leiningen
-```clojure
-[kerodon "0.1.0"]
-```
-
-### Maven (requires adding clojars repo):
-
-```xml
-<dependency>
-  <groupId>kerodon</groupId>
-  <artifactId>kerodon</artifactId>
-  <version>0.1.0</version>
-</dependency>
-```
+kerodon's latest version and information on how to install it is available from [clojars](http://clojars.org).
 
 ## Usage
 
@@ -205,7 +190,7 @@ kerodon runs without an http server and, depending on your setup, transactions c
 
 ## Building
 
-[leiningen](https://github.com/technomancy/leiningen) version 2 is used as the build tool.  ```lein2 all test``` will run the test suite against clojure 1.3, 1.4, 1.5.
+[leiningen](https://github.com/technomancy/leiningen) version 2 is used as the build tool.  ```lein2 all test``` will run the test suite against clojure 1.4, 1.5.
 
 ## License
 
