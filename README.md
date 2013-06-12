@@ -60,7 +60,7 @@ You can create an initial state with ```session```.
 
 #### Navigation
 
-You can use ```visit``` to send a request to your ring app.
+##### You can use ```visit``` to send a request to your ring app.
 
 ```clojure
 (-> (session ring-app) ;Use your ring app
@@ -69,7 +69,9 @@ You can use ```visit``` to send a request to your ring app.
 
 You can pass extra arguments like you can to ```peridot.core/request```, but this is not recommended.
 
-kerodon will not follow redirects automatically.  To follow a redirect use ```follow-redirect```.  This will throw an ```IllegalArgumentException``` when the last response was not a redirect.
+##### You can use ``follow-redirect``` to follow a redirect response.
+
+kerodon will not follow redirects automatically. This will throw an ```IllegalArgumentException``` when the last response was not a redirect.
 
 ```clojure
 (-> (session ring-app) ;Use your ring app
@@ -77,7 +79,7 @@ kerodon will not follow redirects automatically.  To follow a redirect use ```fo
     (follow-redirect))
 ```
 
-You can use ```follow``` to follow a link.
+##### You can use ```follow``` to follow a link.
 
 ```clojure
 (-> (session ring-app) ;Use your ring app
@@ -89,7 +91,7 @@ The selector can be the text of the link, or a vector of css elements.
 
 #### Form interaction
 
-You can use ```fill-in``` to fill in a form field.
+##### You can use ```fill-in``` to fill in a form field.
 
 ```clojure
 (-> (session ring-app) ;Use your ring app
@@ -99,9 +101,9 @@ You can use ```fill-in``` to fill in a form field.
     (fill-in "Password:" "password")
 ```
 
-The selector can be the text or css of a label with a for element, or the css of the field itself.
+The selector can be the text or css of a label with a for attribute, or the css of the field itself.
 
-You can use ```choose``` to fill in a combo box.
+##### You can use ```choose``` to fill in a combo box.
 
 ```clojure
 (-> (session ring-app) ;Use your ring app
@@ -111,10 +113,21 @@ You can use ```choose``` to fill in a combo box.
     (choose "Parent:" "123")
 ```
 
-The selector can be the text or css of a label with a for element, or the css of the field itself.
+The selector can be the text or css of a label with a for attribute, or the css of the field itself.  
 The option argument can be the text of the option, or its value.
 
-You can use ```attach-file``` to fill in a file field.
+##### You can use ```check``` to tick a checkbox.
+
+```clojure
+(-> (session ring-app) ;Use your ring app
+    (visit "/")
+    (follow "login")
+    (check "Remember Me"))
+```
+
+The selector can be the text or css of a label with a for attribute, or the css of the field itself.
+
+##### You can use ```attach-file``` to fill in a file field.
 
 ```clojure
 (-> (session ring-app) ;Use your ring app
@@ -123,9 +136,9 @@ You can use ```attach-file``` to fill in a file field.
     (attach-file "Picture:" (clojure.java.io/file "/tmp/foo")))
 ```
 
-The selector can be the text or css of a label with a for element, or the css of the field itself.
+The selector can be the text or css of a label with a for attribute, or the css of the field itself.
 
-You can use ```press``` to submit a form.
+##### You can use ```press``` to submit a form.
 
 ```clojure
 (-> (session ring-app) ;Use your ring app

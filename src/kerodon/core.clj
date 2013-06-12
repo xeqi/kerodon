@@ -24,6 +24,12 @@
 (defn choose [state selector option]
   (impl/choose-value state selector option))
 
+(defn check [state selector]
+  (impl/check-box state selector))
+
+(defn uncheck [state selector]
+  (impl/uncheck-box state selector))
+
 (defn attach-file [state selector file]
   (impl/set-value state selector file))
 

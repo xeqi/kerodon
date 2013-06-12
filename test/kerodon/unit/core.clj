@@ -359,6 +359,49 @@
                        (choose "Colour" "Blue")
                        submit)))))))))
 
+(deftest test-check-uncheck
+  (letfn [(build-state [control]
+            {:app (constantly :x)
+             :enlive (parse [:form {:action "/"} control
+                             [:input {:type "submit" :value "Submit"}]])})
+          (submit [state] (form-params state "Submit"))]
+    (testing "check / uncheck"
+      (testing "unchecked checkbox"
+        (let [state (build-state '([:label {:for "remember"} "Remember"]
+                                   [:input {:type :checkbox
+                                            :value "Yes"
+                                            :id "remember"
+                                            :name "remember"}]))]
+          (testing "check by label"
+            (is (= "remember=Yes" (-> state (check "Remember") submit))))
+          (testing "check by selector"
+            (is (= "remember=Yes" (-> state (check :#remember) submit))))
+
+          (testing "uncheck by label"
+            (is (= "" (-> state (uncheck "Remember") submit))))
+          (testing "uncheck by selector"
+            (is (= "" (-> state (uncheck :#remember) submit))))
+
+          ))
+      (testing "checked checkbox"
+        (let [state (build-state '([:label {:for "remember"} "Remember"]
+                                   [:input {:type :checkbox
+                                            :value "Yes"
+                                            :checked "checked"
+                                            :id "remember"
+                                            :name "remember"}]))]
+          (testing "check by label"
+            (is (= "remember=Yes" (-> state (check "Remember") submit))))
+          (testing "check by selector"
+            (is (= "remember=Yes" (-> state (check :#remember) submit))))
+
+          (testing "uncheck by label"
+            (is (= "" (-> state (uncheck "Remember") submit))))
+          (testing "uncheck by selector"
+            (is (= "" (-> state (uncheck :#remember) submit))))
+
+          )))))
+
 (deftest test-follow-redirect
   (testing "follow-redirect"
     (testing "sends request to redirected url"

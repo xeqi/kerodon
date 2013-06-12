@@ -160,6 +160,18 @@
                         (form-element-query enlive selector)
                         (mark-option-selected option)))))
 
+(defn check-box [state selector]
+  (assoc state :enlive
+    (enlive/transform (:enlive state)
+                      (form-element-query (:enlive state) selector)
+                      #(assoc-in % [:attrs :checked] "checked"))))
+
+(defn uncheck-box [state selector]
+  (assoc state :enlive
+    (enlive/transform (:enlive state)
+                      (form-element-query (:enlive state) selector)
+                      #(update-in % [:attrs] dissoc :checked))))
+
 (defn find-url [state selector]
   (-> (:enlive state)
       (link selector)
