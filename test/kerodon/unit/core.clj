@@ -97,12 +97,12 @@
 (defn test-press-method [data request test-body]
   (let [state {:app (constantly :x)
                :enlive (parse [:form data
-                               [:label {:for "user"} "User"]
+                               [:label {:for "user-id"} "User"]
                                [:input {:id "user-id"
                                         :type "text"
                                         :name "user"
                                         :value "user-value"}]
-                               [:label {:for "password"} "Password"]
+                               [:label {:for "password-id"} "Password"]
                                [:input {:id "password-id"
                                         :type "password"
                                         :name "password"
@@ -200,7 +200,7 @@
                                 :content
                                 (list
                                   {:tag :label
-                                   :attrs {:for "file"}
+                                   :attrs {:for "file-id"}
                                    :content '("File")}
                                   {:tag :input
                                    :attrs {:value (proxy [java.io.File]
@@ -274,25 +274,39 @@
 (deftest test-fill-in
   (testing "fill-in"
     (testing "text input"
-      (test-fill-in-helper '([:label {:for "user"} "User"]
+      (test-fill-in-helper '([:label {:for "user-id"} "User"]
                              [:input {:type "text"
                                       :id "user-id" :name "user"}])
                            "User" :#user-id "x" "user=x"))
     (testing "password input"
-      (test-fill-in-helper '([:label {:for "password"} "Password"]
+      (test-fill-in-helper '([:label {:for "password-id"} "Password"]
                              [:input {:type "password"
                                       :id "password-id" :name "password"}])
                            "Password" :#password-id "secret" "password=secret"))
     (testing "textarea"
-      (test-fill-in-helper '([:label {:for "message"} "Message"]
+      (test-fill-in-helper '([:label {:for "message-id"} "Message"]
                              [:textarea {:id "message-id" :name "message"}])
                            "Message" :#message-id "blah" "message=blah"))
-    (testing "not found throws exception"
+    (testing "selector not found throws exception"
+      (let [state {:app (constantly :x)
+                   :enlive (parse [:form [:input {:name "something"}]])}]
+        (is (thrown-with-msg? Exception
+              #"field could not be found with selector \":#NonExistant\""
+              (fill-in state :#NonExistant "")))))
+    (testing "label not found throws exception"
       (let [state {:app (constantly :x)
                    :enlive (parse [:form [:input {:name "something"}]])}]
         (is (thrown-with-msg? Exception
               #"field could not be found with selector \"NonExistant\""
-              (fill-in state "NonExistant" "")))))))
+              (fill-in state "NonExistant" "")))))
+    (testing "label doesn't match throws exception"
+      (let [state {:app (constantly :x)
+                   :enlive (parse [:form
+                                   [:label {:for "another"} "dangling"]
+                                   [:input {:name "something"}]])}]
+        (is (thrown-with-msg? Exception
+              #"field could not be found with selector \":#another\""
+              (fill-in state "dangling" "")))))))
 
 (deftest test-choose
   (letfn [(build-state [control]
@@ -438,7 +452,7 @@
 (deftest test-attach-file
   (testing "attach-file"
     (let [state {:enlive (parse [:form
-                                 [:label {:for "file"} "File"]
+                                 [:label {:for "file-id"} "File"]
                                  [:input {:id "file-id"
                                           :type "file"
                                           :name "file"}]])}]

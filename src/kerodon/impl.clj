@@ -19,8 +19,8 @@
 
 ;; selectors
 
-(defn form-element-by-name [name]
-  [:form (enlive/attr-has :name name)])
+(defn form-element-by [attr val]
+  [:form (enlive/attr-has attr val)])
 
 (defn css-or-content [selector]
   (if (string? selector)
@@ -33,6 +33,11 @@
     selector))
 
 ;; finders
+(defn- not-found [type selector]
+  (throw
+    (IllegalArgumentException.
+      (format "%s could not be found with selector \"%s\"" type selector))))
+
 (defn form-with-submit [node selector]
   (if-let [elem (first (enlive/select
                         node
@@ -42,36 +47,40 @@
                              (enlive/attr= :type "submit")
                              (css-or-value selector)]])]]))]
     elem
-    (throw (IllegalArgumentException.
-            (str "button could not be found with selector \""
-                 selector "\"")))))
+    (not-found "button" selector)))
 
 (defn form-element [node selector]
   (if-let [elem (first (enlive/select
                         node
                         [:form (css-or-content selector)]))]
     elem
-    (throw (IllegalArgumentException.
-            (str "field could not be found with selector \"" selector "\"")))))
+    (not-found "field" selector)))
 
 (defn link [node selector]
   (if-let [link (first (enlive/select
                         node
                         [[:a (css-or-content selector)]]))]
     link
-    (throw (IllegalArgumentException.
-            (str "link could not be found with selector \""
-                 selector "\"")))))
+    (not-found "link" selector)))
 
-(defn name-from-element [elem]
+(defn- field-to-selector [elem]
+  (form-element-by :name (get-in elem [:attrs :name])))
+
+(defn- label-to-selector [doc elem]
+  (let [id (get-in elem [:attrs :for])
+        selector (form-element-by :id id)]
+    (if-let [field (first (enlive/select doc selector))]
+      selector
+      (not-found "field" (keyword (str "#" id))))))
+
+(defn- form-element-selector [doc elem]
   (if (= :label (:tag elem))
-    (:for (:attrs elem))
-    (:name (:attrs elem))))
+    (label-to-selector doc elem)
+    (field-to-selector elem)))
 
 (defn form-element-query [node selector]
-  (-> (form-element node selector)
-      name-from-element
-      form-element-by-name))
+  (->> (form-element node selector)
+       (form-element-selector node)))
 
 (defn form-element-for [node selector]
   (enlive/select node (form-element-query node selector)))

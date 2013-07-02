@@ -69,7 +69,7 @@ You can create an initial state with ```session```.
 
 You can pass extra arguments like you can to ```peridot.core/request```, but this is not recommended.
 
-##### You can use ``follow-redirect``` to follow a redirect response.
+##### You can use ``follow-redirect`` to follow a redirect response.
 
 kerodon will not follow redirects automatically. This will throw an ```IllegalArgumentException``` when the last response was not a redirect.
 

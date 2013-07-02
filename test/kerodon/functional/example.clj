@@ -22,12 +22,12 @@
      {:get (constantly
             (response/response
              (hiccup/html [:form {:action "/login" :method "post"}
-                           [:label {:for "user"} "User"]
-                           [:input {:type "text" :name "user"}]
-                           [:label {:for "password"} "Password"]
-                           [:input {:type "password" :name "password"}]
-                           [:label {:for "type"} "Type"]
-                           [:select {:name "type"}
+                           [:label {:for "user-id"} "User"]
+                           [:input {:type "text" :name "user" :id "user-id"}]
+                           [:label {:for "password-id"} "Password"]
+                           [:input {:type "password" :name "password" :id "password-id"}]
+                           [:label {:for "type-id"} "Type"]
+                           [:select {:name "type" :id "type-id"}
                             [:option "Administrator"]
                             [:option "Standard"]]
                            [:input {:type "submit" :value "Login"}]])))

@@ -25,7 +25,7 @@
 (deftest test-value?
   (testing "value?"
     (let [state {:enlive (parse [:form
-                                 [:label {:for "user"} "User"]
+                                 [:label {:for "user-id"} "User"]
                                  [:input {:id "user-id"
                                           :type "text"
                                           :name "user"
