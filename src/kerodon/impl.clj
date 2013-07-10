@@ -27,6 +27,12 @@
     (enlive/pred #(= (:content %) [selector]))
     selector))
 
+(defn css-or-label [selector]
+  (if (string? selector)
+    (enlive/pred #(and (= (:tag %1) :label)
+                       (= (enlive/texts [%1]) [selector])))
+    selector))
+
 (defn css-or-value [selector]
   (if (string? selector)
     (enlive/attr= :value selector)
@@ -52,7 +58,7 @@
 (defn form-element [node selector]
   (if-let [elem (first (enlive/select
                         node
-                        [:form (css-or-content selector)]))]
+                        [:form (css-or-label selector)]))]
     elem
     (not-found "field" selector)))
 
@@ -66,12 +72,15 @@
 (defn- field-to-selector [elem]
   (form-element-by :name (get-in elem [:attrs :name])))
 
-(defn- label-to-selector [doc elem]
-  (let [id (get-in elem [:attrs :for])
-        selector (form-element-by :id id)]
-    (if-let [field (first (enlive/select doc selector))]
-      selector
-      (not-found "field" (keyword (str "#" id))))))
+(defn- label-to-selector [doc label]
+  (if-let [id (get-in label [:attrs :for])]
+    (let [selector (form-element-by :id id)]
+      (if (first (enlive/select doc selector))
+        selector
+        (not-found "field" (keyword (str "#" id)))))
+    (if-let [field (first (enlive/select label [#{:input :select :textarea}]))]
+      (form-element-by :name (get-in field [:attrs :name]))
+      (not-found "field inside label" (apply str (enlive/texts [label]))))))
 
 (defn- form-element-selector [doc elem]
   (if (= :label (:tag elem))

@@ -394,9 +394,7 @@
           (testing "uncheck by label"
             (is (= "" (-> state (uncheck "Remember") submit))))
           (testing "uncheck by selector"
-            (is (= "" (-> state (uncheck :#remember) submit))))
-
-          ))
+            (is (= "" (-> state (uncheck :#remember) submit))))))
       (testing "checked checkbox"
         (let [state (build-state '([:label {:for "remember"} "Remember"]
                                    [:input {:type :checkbox
@@ -412,9 +410,21 @@
           (testing "uncheck by label"
             (is (= "" (-> state (uncheck "Remember") submit))))
           (testing "uncheck by selector"
-            (is (= "" (-> state (uncheck :#remember) submit))))
-
-          )))))
+            (is (= "" (-> state (uncheck :#remember) submit))))))
+      (testing "checkbox inside label"
+        (let [state (build-state '([:label
+                                    "Remember"
+                                    [:input {:type :checkbox
+                                             :value "Yes"
+                                             :name "remember"}]]))]
+          (is (= "remember=Yes" (-> state (check "Remember") submit)))))
+      (testing "label without checkbox"
+        (let [state (build-state '([:label
+                                    "Empty"]))]
+          (is (thrown-with-msg?
+                Exception
+                #"field inside label could not be found with selector \"Empty\""
+                (-> state (check "Empty") submit))))))))
 
 (deftest test-follow-redirect
   (testing "follow-redirect"
