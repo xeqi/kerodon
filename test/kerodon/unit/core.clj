@@ -83,10 +83,13 @@
 (deftest test-follow
   (testing "follow by link"
     (let [state {:app (constantly :x)
-                 :enlive (parse [:a {:id "go-login"
-                                     :href "/login"} "login"])}]
+                 :enlive (parse [:div {} 
+                                 [:a {:id "go-login" :href "/login"} "login"]
+                                 [:a {:href "/login"} "   \n link with whitespaces \n "]])}]
       (testing "text"
         (test-follow-method state "login"))
+      (testing "text with whitespaces"
+        (test-follow-method state "link with whitespaces"))
       (testing "css"
         (test-follow-method state :#go-login))
       (testing "not found throws exception"
