@@ -24,7 +24,7 @@
 
 (defn css-or-content [selector]
   (if (string? selector)
-    (enlive/pred #(= (:content %) [selector]))
+    (enlive/pred #(= (map clojure.string/trim (:content %)) [selector]))
     selector))
 
 (defn css-or-label [selector]
