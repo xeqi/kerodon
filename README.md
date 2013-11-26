@@ -4,7 +4,7 @@ kerodon is an interaction and testing library for [ring](https://github.com/ring
 
 ## Dependency Information
 
-kerodon's latest version and information on how to install it is available from [clojars](http://clojars.org).
+kerodon's latest version and information on how to install it is available from [clojars](http://clojars.org/kerodon).
 
 ## Usage
 
