@@ -113,7 +113,7 @@ The selector can be the text or css of a label with a for attribute, or the css 
     (choose "Parent:" "123")
 ```
 
-The selector can be the text or css of a label with a for attribute, or the css of the field itself.  
+The selector can be the text or css of a label with a for attribute, or the css of the field itself.
 The option argument can be the text of the option, or its value.
 
 ##### You can use ```check``` to tick a checkbox.
@@ -170,7 +170,7 @@ The api namespace for testing is ```kerodon.test```.  This uses the same machine
 The main function is ```has```.  It allows the verifications to compose using ->.  It requires one of the verification functions, and an optional error message.
 
 You can use ```status?``` to validate the status code of the last response.
-You can use ```text?``` to validate the text in the page.
+You can use ```text?``` or ```regex?```to validate the text in the page.
 You can use ```value?``` to validate the value of a field.  The
 selector can be the text or css of a label with a for element, or the
 css of the field itself.
@@ -182,7 +182,9 @@ You can use ```attr?``` to validate an attribute's value.
     (has (status? 200)
          "page is found")
     (has (text? "hello world")
-         "page says hello world"))
+         "page says hello world")
+    (has (regex? ".*world.*")
+         "page includes 'world'"))
 
 (-> (session ring-app)
     (visit "/comment/new")
