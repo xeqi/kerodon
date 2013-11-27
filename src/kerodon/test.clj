@@ -24,6 +24,15 @@
                                      :expected (quote ~exp-msg)})))
      state#))
 
+(defn re-match? [s r]
+  (not (nil? (re-matches (re-pattern r) s))))
+
+(defmacro regex? [expected]
+  `(validate re-match?
+             #(apply str (enlive/texts (:enlive %)))
+             ~expected
+             (~'regex? ~expected)))
+
 (defmacro text? [expected]
   `(validate =
              #(apply str (enlive/texts (:enlive %)))

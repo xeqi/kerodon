@@ -94,6 +94,22 @@
                       #(text? "yes")
                       state)))))
 
+(deftest test-regex?
+  (testing "regex?"
+    (let [state {:enlive (parse [:p "foobar"])}]
+      (testing "fails if regex does not match"
+        (check-report {:type :fail
+                       :expected '(regex? "f.*rbaz")
+                       :actual "foobar"}
+                      #(regex? "f.*rbaz")
+                      state))
+      (testing "passes if regex matches"
+        (check-report {:type :pass
+                       :expected '(regex? "f.*r")
+                       :actual "foobar"}
+                      #(regex? "f.*r")
+                      state)))))
+
 (deftest test-attr?
   (testing "attr?"
     (let [state {:enlive (parse [:p {:data-url "something"} "yes"])}]
