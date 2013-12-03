@@ -94,6 +94,28 @@
                       #(text? "yes")
                       state)))))
 
+(deftest test-text-in?
+  (testing "text-in?"
+    (let [state {:enlive (parse [:p "this is a test"])}]
+      (testing "fails if text is not found"
+        (check-report {:type :fail
+                       :expected '(text-in? "foo")
+                       :actual "this is a test"}
+                      #(text-in? "foo")
+                      state))
+      (testing "fails if content is subset of matcher"
+        (check-report {:type :fail
+                       :expected '(text-in? "and this is a test")
+                       :actual "this is a test"}
+                      #(text-in? "and this is a test")
+                      state))
+      (testing "passes if text is found"
+        (check-report {:type :pass
+                       :expected '(text-in? "is a")
+                       :actual "this is a test"}
+                      #(text-in? "is a")
+                      state)))))
+
 (deftest test-regex?
   (testing "regex?"
     (let [state {:enlive (parse [:p "foobar"])}]
@@ -108,6 +130,22 @@
                        :expected '(regex? "f.*r")
                        :actual "foobar"}
                       #(regex? "f.*r")
+                      state)))))
+
+(deftest test-regex-in?
+  (testing "regex-in?"
+    (let [state {:enlive (parse [:p "Account Number: #12345"])}]
+      (testing "fails if regex is not found"
+        (check-report {:type :fail
+                       :expected '(regex-in? "\\d{6}")
+                       :actual "Account Number: #12345"}
+                      #(regex-in? "\\d{6}")
+                      state))
+      (testing "passes if regex is found"
+        (check-report {:type :pass
+                       :expected '(regex-in? "\\d{5}")
+                       :actual "Account Number: #12345"}
+                      #(regex-in? "\\d{5}")
                       state)))))
 
 (deftest test-attr?
@@ -138,6 +176,38 @@
                        :expected '(attr? [:p] :data-url "something")
                        :actual "something"}
                       #(attr? [:p] :data-url "something")
+                      state)))))
+
+(deftest test-link?
+  (testing "link?"
+    (let [state {:enlive (parse [:p "Click " [:a {:href "#"} "here"] " to login"])}]
+      (testing "fails if link is not found"
+        (check-report {:type :fail
+                       :expected '(link? "somewhere")
+                       :actual '({:href "#" :text "here"})}
+                      #(link? "somewhere")
+                      state))
+      (testing "passes if link is found"
+        (check-report {:type :pass
+                       :expected '(link? "here")
+                       :actual [{:href "#" :text "here"}]}
+                      #(link? "here")
+                      state)))))
+
+(deftest test-heading?
+  (testing "heading?"
+    (let [state {:enlive (parse [:section [:p "Foo"] [:h2 "FizzBuzz"] [:p "Bar"]])}]
+      (testing "fails if heading is not found"
+        (check-report {:type :fail
+                       :expected '(heading? "Foo")
+                       :actual ["FizzBuzz"]}
+                      #(heading? "Foo")
+                      state))
+      (testing "passes if heading is found"
+        (check-report {:type :pass
+                       :expected '(heading? "FizzBuzz")
+                       :actual ["FizzBuzz"]}
+                      #(heading? "FizzBuzz")
                       state)))))
 
 (deftest test-missing?
