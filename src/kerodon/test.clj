@@ -54,18 +54,21 @@
              ~expected
              (~'text-in? ~expected)))
 
-(defmacro link? [selector]
-  `(validate #(seq (filter (fn [link#]
-                             (or
-                               (= (:href link#) %2)
-                               (= (:text link#) %2)))
-                           %1))
+(defmacro link? [key & [val]]
+  `(validate #(let [href# (:href %2)
+                    text# (:text %2)]
+                (some (fn [link#]
+                        (or (and href# (= href# (:href link#)))
+                            (and text# (= text# (:text link#)))))
+                      %1))
              #(map (fn [link#]
                      {:href (get-in link# [:attrs :href])
                       :text (apply str (enlive/texts (:content link#)))})
                    (enlive/select (:enlive %) [:a]))
-             ~selector
-             (~'link? ~selector)))
+             (if (nil? ~val)
+               {:href ~key}
+               {~key ~val})
+             (~'link? ~key ~val)))
 
 (defmacro heading? [expected]
   `(validate #(seq (filter (partial = %2) %1))

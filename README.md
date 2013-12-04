@@ -176,7 +176,7 @@ You can use ```value?``` to validate the value of a field.  The
 selector can be the text or css of a label with a for element, or the
 css of the field itself.
 You can use ```attr?``` to validate an attribute's value.
-You can use ```link?``` to look for an anchor tag with matching text or href.
+You can use ```link?``` to look for an anchor tag with matching href, or (optionally) text.
 You can use ```heading?``` to look for a heading (h1 - h6) with matching text.
 
 ```clojure
@@ -199,6 +199,13 @@ You can use ```heading?``` to look for a heading (h1 - h6) with matching text.
 (-> (session ring-app)
     (visit "/comment/new")
     (has (attr? [:form] :class "comments")))
+
+(-> (session ring-app)
+	(visit "/welcome")
+	(has (link? "/session/new")
+		 "page has link to login")
+	(has (link? :text "Login")
+		"login link text is 'Login'"))
 ```
 
 These should all work with ```within```.

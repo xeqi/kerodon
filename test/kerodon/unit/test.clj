@@ -180,18 +180,36 @@
 
 (deftest test-link?
   (testing "link?"
-    (let [state {:enlive (parse [:p "Click " [:a {:href "#"} "here"] " to login"])}]
+    (let [state {:enlive (parse [:p "Click " [:a {:href "/foo"} "here"] " to login"])}]
       (testing "fails if link is not found"
         (check-report {:type :fail
-                       :expected '(link? "somewhere")
-                       :actual '({:href "#" :text "here"})}
-                      #(link? "somewhere")
+                       :expected '(link? "/bar" nil)
+                       :actual '({:href "/foo" :text "here"})}
+                      #(link? "/bar")
                       state))
       (testing "passes if link is found"
         (check-report {:type :pass
-                       :expected '(link? "here")
-                       :actual [{:href "#" :text "here"}]}
+                       :expected '(link? "/foo" nil)
+                       :actual [{:href "/foo" :text "here"}]}
+                      #(link? "/foo")
+                      state))
+      (testing "matches only href by default"
+        (check-report {:type :fail
+                       :expected '(link? "here" nil)
+                       :actual [{:href "/foo" :text "href"}]}
                       #(link? "here")
+                      state))
+      (testing "can match href explicitly"
+        (check-report {:type :pass
+                       :expected '(link? :href "/foo")
+                       :actual [{:href "/foo" :text "href"}]}
+                      #(link? :href "/foo")
+                      state))
+      (testing "can match text instead of href"
+        (check-report {:type :pass
+                       :expected '(link? :text "here")
+                       :actual [{:href "/foo" :text "here"}]}
+                      #(link? :text "here")
                       state)))))
 
 (deftest test-heading?
