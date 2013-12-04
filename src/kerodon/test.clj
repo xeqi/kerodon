@@ -71,7 +71,7 @@
              (~'link? ~key ~val)))
 
 (defmacro heading? [expected]
-  `(validate #(seq (filter (partial = %2) %1))
+  `(validate #(some (partial = %2) %1)
              #(map (fn [h#] (apply str (enlive/texts (:content h#))))
                    (concat
                      (enlive/select (:enlive %) [:h1])
