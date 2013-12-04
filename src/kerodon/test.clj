@@ -68,10 +68,7 @@
              (~'link? ~selector)))
 
 (defmacro heading? [expected]
-  `(validate #(seq (filter (fn [h#]
-                             (println h#)
-                             (= %2 h#))
-                           %1))
+  `(validate #(seq (filter (partial = %2) %1))
              #(map (fn [h#] (apply str (enlive/texts (:content h#))))
                    (concat
                      (enlive/select (:enlive %) [:h1])
