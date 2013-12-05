@@ -28,6 +28,15 @@ files and input streams, and those are hard to create in test cases, so don't te
         details (apply hash-map :url parsed)]
     (is (= expected (:params details)))))
 
+(defn multi-button-form-produces [fields-html button expected]
+  (let [html (str "<form action=/>"
+                  fields-html
+                  "</form>")
+        enlive (to-html-resource html)
+        parsed (build-request-details {:enlive enlive} button)
+        details (apply hash-map :url parsed)]
+    (is (= expected (:params details)))))
+
 (deftest test-build-request-details
   "Test that we can parse the value of a variety of different form elements
   Attempts to follow the spec:
@@ -146,4 +155,23 @@ files and input streams, and those are hard to create in test cases, so don't te
     (form-produces (str "<input type=text name=A disabled>"
                         "<select name=B disabled><option>A</option></select>"
                         "<textarea name=C disabled>content</textarea>")
-                   {})))
+                   {}))
+  (testing "multiple buttons"
+    (testing "'Yes' button"
+      (multi-button-form-produces
+        (str "<input type=submit name=confirm value=Yes />"
+             "<input type=submit name=confirm value=No />"
+             "<input type=submit name=confirm value=Cancel />")
+        "Yes" {"confirm" "Yes"}))
+    (testing "'No' button"
+      (multi-button-form-produces
+        (str "<input type=submit name=confirm value=Yes />"
+             "<input type=submit name=confirm value=No />"
+             "<input type=submit name=confirm value=Cancel />")
+        "No" {"confirm" "No"}))
+    (testing "'Cancel' button"
+      (multi-button-form-produces
+        (str "<input type=submit name=confirm value=Yes />"
+             "<input type=submit name=confirm value=No />"
+             "<input type=submit name=confirm value=Cancel />")
+        "Cancel" {"confirm" "Cancel"}))))

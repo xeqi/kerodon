@@ -44,15 +44,25 @@
     (IllegalArgumentException.
       (format "%s could not be found with selector \"%s\"" type selector))))
 
-(defn form-with-submit [node selector]
-  (if-let [elem (first (enlive/select
-                        node
-                        [[:form
-                          (enlive/has
-                           [[:input
-                             (enlive/attr= :type "submit")
-                             (css-or-value selector)]])]]))]
-    elem
+(defn form-and-button
+  "Given a form, returns both the form and the specified submit button."
+  [form selector]
+  (let [button (first
+                 (enlive/select form
+                                [[:input
+                                  (enlive/attr= :type "submit")
+                                  (css-or-value selector)]]))]
+    [form button]))
+
+(defn form-and-submit
+  "Locates the form containing the specified submit button.
+  Returns the form and the button itself."
+  [node selector]
+  (if-let [found
+           (first (filter (fn [[form button]] (not (nil? button)))
+                          (map (fn [form] (form-and-button form selector))
+                               (enlive/select node [:form]))))]
+    found
     (not-found "button" selector)))
 
 (defn form-element [node selector]
@@ -281,11 +291,20 @@
   "Get the name attribute for a form field"
   [field] (get-in field [:attrs :name]))
 
+(defn is-submit-button?
+  "Checks if the field is a form submit button."
+  [field]
+  (and (= :input (:tag field))
+       (= "submit" (:type (:attrs field)))))
 
-(defn all-form-params [form]
+(defn all-form-params [form & [button]]
   (reduce (fn [params field]
-            (if-let [value (field->value field)]
-              (assoc-conj params (field-name field) value)
+            (if (or (nil? button)
+                    (not (is-submit-button? field))
+                    (= button field))
+              (if-let [value (field->value field)]
+                (assoc-conj params (field-name field) value)
+                params)
               params))
           (om/ordered-map)
           (enlive/select form [[#{:input :textarea :select}
@@ -293,9 +312,9 @@
                                 (enlive/attr? :name)]])))
 
 (defn build-request-details [state selector]
-  (let [form (form-with-submit (:enlive state) selector)
+  (let [[form button] (form-and-submit (:enlive state) selector)
         method (keyword (string/lower-case (:method (:attrs form) "post")))
         url (or (not-empty (:action (:attrs form)))
                 (build-url (:request state)))
-        params (all-form-params form)]
+        params (all-form-params form button)]
     [url :request-method method :params params]))
