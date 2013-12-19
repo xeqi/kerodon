@@ -258,6 +258,45 @@
                 (is (re-find #"multipart/form-data;" (:content-type
                                                       (:request state))))))))))))
 
+(deftest test-press-with-multiple-buttons
+  (let [state {:app (constantly :x)
+               :enlive (parse [:form {:action "/login" :method :post}
+                               [:label {:for "user-id"} "User"]
+                               [:input {:id "user-id"
+                                        :type "text"
+                                        :name "user"
+                                        :value "user-value"}]
+                               [:label {:for "password-id"} "Password"]
+                               [:input {:id "password-id"
+                                        :type "password"
+                                        :name "password"
+                                        :value "password-value"}]
+                               [:input {:id "submit-yes-id"
+                                        :type "submit"
+                                        :name "submit"
+                                        :value "Yes"}]
+                               [:input {:id "submit-no-id"
+                                        :type "submit"
+                                        :name "submit"
+                                        :value "No"}]
+                               [:input {:id "submit-cancel-id"
+                                        :type "submit"
+                                        :name "submit"
+                                        :value "Cancel"}]])
+               :request {:server-port 80
+                         :server-name "localhost"
+                         :remote-addr "localhost"
+                         :uri "/login"
+                         :query-string nil
+                         :scheme :http
+                         :request-method :get
+                         :headers {"host" "localhost"}}}]
+    (testing "press-with-multiple-buttons"
+      (testing "'Yes' button"
+        (let [pressed-yes (press state "Yes")
+              body (slurp (:body (:request pressed-yes)))]
+          (is (= "user=user-value&password=password-value&submit=Yes" body)))))))
+
 (defn form-params [state submit]
   (-> state
       (press submit)
