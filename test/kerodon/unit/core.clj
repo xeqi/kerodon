@@ -112,7 +112,11 @@
                                         :value "password-value"}]
                                [:input {:id "submit-id"
                                         :type "submit"
-                                        :value "Login"}]])
+                                        :value "Login"}]
+                               ;; also test for using a submit -button- (instead of input)
+                               [:button {:id "submit-id2"
+                                         :type "submit"
+                                         :value "Login2"}]])
                :request {:server-port 80
                          :server-name "localhost"
                          :remote-addr "localhost"
@@ -125,10 +129,16 @@
       (testing "sends from :enlive form"
         (let [state (press state "Login")]
           (is (= request (dissoc (:request state) :body)))
+          (test-body (:body (:request state))))
+        (let [state (press state "Login2")]
+          (is (= request (dissoc (:request state) :body)))
           (test-body (:body (:request state))))))
     (testing "by css"
       (testing "sends from :enlive form"
         (let [state (press state [:#submit-id])]
+          (is (= request (dissoc (:request state) :body)))
+          (test-body (:body (:request state))))
+        (let [state (press state [:#submit-id2])]
           (is (= request (dissoc (:request state) :body)))
           (test-body (:body (:request state))))))
     (testing "not found throws exception"
