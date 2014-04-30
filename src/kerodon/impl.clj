@@ -49,7 +49,7 @@
   [form selector]
   (let [button (first
                  (enlive/select form
-                                [[:input
+                                [[#{:input :button}
                                   (enlive/attr= :type "submit")
                                   (css-or-value selector)]]))]
     [form button]))
