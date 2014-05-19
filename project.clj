@@ -5,7 +5,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.4.0"]
-                 [peridot "0.2.1"]
+                 [peridot "0.3.0"]
                  [enlive "1.0.0" :exclusions [org.clojure/clojure]]
                  [ring/ring-codec "1.0.0"]
                  [org.flatland/ordered "1.5.1"]]
@@ -16,5 +16,6 @@
                                    [ring/ring-core "1.1.5"]
                                    [hiccup "1.0.1"]]
                     :resource-paths ["test-resources"]}
-             :1.5 {:dependencies [[org.clojure/clojure "1.5.1"]]}}
-  :aliases {"all" ["with-profile" "test:test,1.5"]})
+             :1.5 {:dependencies [[org.clojure/clojure "1.5.1"]]}
+             :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}}
+  :aliases {"all" ["with-profile" "test:test,1.5:test,1.6"]})
