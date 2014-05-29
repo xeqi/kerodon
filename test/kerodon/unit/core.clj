@@ -142,18 +142,13 @@
       (testing "without method"
         (let [request {:remote-addr "localhost"
                        :scheme :http
-                       :request-method :post
-                       :query-string nil
-                       :content-type "application/x-www-form-urlencoded"
+                       :request-method :get
+                       :query-string query
                        :uri "/login"
                        :server-name "localhost"
-                       :headers {"content-length" (str (count query))
-                                 "content-type"
-                                 "application/x-www-form-urlencoded"
-                                 "host" "localhost"}
-                       :content-length (count query)
+                       :headers {"host" "localhost"}
                        :server-port 80}
-              t #(is (= query (slurp %)))]
+              t (fn [x])]
           (test-press-method {:action "/login"} request t)
           (testing "or action"
             (test-press-method {} request t))
@@ -199,7 +194,7 @@
         (let [state {:app (constantly :x)
                      :enlive (list
                                {:tag :form
-                                :attrs nil
+                                :attrs {:method "post"}
                                 :content
                                 (list
                                   {:tag :label
@@ -304,7 +299,7 @@
 
 (defn test-fill-in-helper [control label selector value result]
   (let [state {:app (constantly :x)
-               :enlive (parse [:form {:action "/"} control
+               :enlive (parse [:form {:action "/" :method "post"} control
                                [:input {:type "submit" :value "Submit"}]])}]
     (testing "using label updates form value"
       (let [state (fill-in state label value)]
@@ -331,13 +326,13 @@
                            "Message" :#message-id "blah" "message=blah"))
     (testing "selector not found throws exception"
       (let [state {:app (constantly :x)
-                   :enlive (parse [:form [:input {:name "something"}]])}]
+                   :enlive (parse [:form {:method "post"} [:input {:name "something"}]])}]
         (is (thrown-with-msg? Exception
               #"field could not be found with selector \":#NonExistant\""
               (fill-in state :#NonExistant "")))))
     (testing "label not found throws exception"
       (let [state {:app (constantly :x)
-                   :enlive (parse [:form [:input {:name "something"}]])}]
+                   :enlive (parse [:form {:method "post"} [:input {:name "something"}]])}]
         (is (thrown-with-msg? Exception
               #"field could not be found with selector \"NonExistant\""
               (fill-in state "NonExistant" "")))))
@@ -353,7 +348,7 @@
 (deftest test-choose
   (letfn [(build-state [control]
             {:app (constantly :x)
-             :enlive (parse [:form {:action "/"} control
+             :enlive (parse [:form {:action "/" :method "post"} control
                              [:input {:type "submit" :value "Submit"}]])})
           (submit [state] (form-params state "Submit"))]
     (testing "choose"
@@ -418,7 +413,7 @@
 (deftest test-check-uncheck
   (letfn [(build-state [control]
             {:app (constantly :x)
-             :enlive (parse [:form {:action "/"} control
+             :enlive (parse [:form {:action "/" :method "post"} control
                              [:input {:type "submit" :value "Submit"}]])})
           (submit [state] (form-params state "Submit"))]
     (testing "check / uncheck"
@@ -503,7 +498,7 @@
 
 (deftest test-attach-file
   (testing "attach-file"
-    (let [state {:enlive (parse [:form
+    (let [state {:enlive (parse [:form {:method "post"}
                                  [:label {:for "file-id"} "File"]
                                  [:input {:id "file-id"
                                           :type "file"
