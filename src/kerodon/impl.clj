@@ -313,7 +313,7 @@
 
 (defn build-request-details [state selector]
   (let [[form button] (form-and-submit (:enlive state) selector)
-        method (keyword (string/lower-case (:method (:attrs form) "post")))
+        method (keyword (string/lower-case (:method (:attrs form) "get")))
         url (or (not-empty (:action (:attrs form)))
                 (build-url (:request state)))
         params (all-form-params form button)]
