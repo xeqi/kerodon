@@ -217,7 +217,7 @@ kerodon runs without an http server and, depending on your setup, transactions c
 
 ## Building
 
-[leiningen](https://github.com/technomancy/leiningen) version 2 is used as the build tool.  ```lein2 all test``` will run the test suite against clojure 1.4, 1.5.
+[leiningen](https://github.com/technomancy/leiningen) is used as the build tool.  ```lein all test``` will run the test suite against clojure 1.4, 1.5 and 1.6.
 
 ## License
 
