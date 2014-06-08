@@ -83,7 +83,7 @@
 (deftest test-follow
   (testing "follow by link"
     (let [state {:app (constantly :x)
-                 :enlive (parse [:div {} 
+                 :enlive (parse [:div {}
                                  [:a {:id "go-login" :href "/login"} "login"]
                                  [:a {:href "/login"} "   \n link with whitespaces \n "]])}]
       (testing "text"
@@ -116,7 +116,8 @@
                                ;; also test for using a submit -button- (instead of input)
                                [:button {:id "submit-id2"
                                          :type "submit"
-                                         :value "Login2"}]])
+                                         :value "Login2"}
+                                "Button Login"]])
                :request {:server-port 80
                          :server-name "localhost"
                          :remote-addr "localhost"
@@ -130,7 +131,7 @@
         (let [state (press state "Login")]
           (is (= request (dissoc (:request state) :body)))
           (test-body (:body (:request state))))
-        (let [state (press state "Login2")]
+        (let [state (press state "Button Login")]
           (is (= request (dissoc (:request state) :body)))
           (test-body (:body (:request state))))))
     (testing "by css"

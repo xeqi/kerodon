@@ -47,11 +47,13 @@
 (defn form-and-button
   "Given a form, returns both the form and the specified submit button."
   [form selector]
-  (let [button (first
-                 (enlive/select form
-                                [[#{:input :button}
-                                  (enlive/attr= :type "submit")
-                                  (css-or-value selector)]]))]
+  (let [query #{[:input
+                  (enlive/attr= :type "submit")
+                  (css-or-value selector)]
+                 [:button
+                  (enlive/attr= :type "submit")
+                  (css-or-content selector)]}
+        button (first (enlive/select form [query]))]
     [form button]))
 
 (defn form-and-submit
@@ -255,6 +257,17 @@
         (->> (map option-value))
         ((fn [values] (if single (first values) (seq values)))))))
 
+(defn- is-submit-button?
+  "Checks if the field is a form submit button."
+  [field]
+  (and (contains? #{:input :button} (:tag field))
+       (= (get-in field [:attrs :type]) "submit")))
+
+(defmethod field->value :button
+  [field]
+  (if (is-submit-button? field)
+    (get-in field [:attrs :value])))
+
 (declare input->value)
 (defmethod field->value :input
   ;; Delegate input field handling to a second multimethod
@@ -277,6 +290,13 @@
   (when (contains? (:attrs field) :checked)
     (get-in field [:attrs :value] "on")))
 
+(derive ::reset ::ignored)
+(derive ::button ::ignored)
+
+(defmethod input->value ::ignored
+  [field]
+  nil)
+
 (defmethod input->value ::file
   ;; File inputs should not be coerced into strings
   [field]
@@ -291,25 +311,25 @@
   "Get the name attribute for a form field"
   [field] (get-in field [:attrs :name]))
 
-(defn is-submit-button?
-  "Checks if the field is a form submit button."
-  [field]
-  (and (= :input (:tag field))
-       (= "submit" (:type (:attrs field)))))
+(defn- other-submit-button?
+  "is field a submit button other than the pressed one?"
+  [field button]
+  (and (not (nil? button))
+       (is-submit-button? field)
+       (not= button field)))
 
 (defn all-form-params [form & [button]]
-  (reduce (fn [params field]
-            (if (or (nil? button)
-                    (not (is-submit-button? field))
-                    (= button field))
-              (if-let [value (field->value field)]
-                (assoc-conj params (field-name field) value)
-                params)
-              params))
-          (om/ordered-map)
-          (enlive/select form [[#{:input :textarea :select}
-                                (enlive/but (enlive/attr? :disabled))
-                                (enlive/attr? :name)]])))
+  (reduce
+   (fn [params field]
+     (if-not (other-submit-button? field button)
+       (if-let [value (field->value field)]
+         (assoc-conj params (field-name field) value)
+         params)
+       params))
+   (om/ordered-map)
+   (enlive/select form [[#{:input :textarea :select :button}
+                         (enlive/but (enlive/attr? :disabled))
+                         (enlive/attr? :name)]])))
 
 (defn build-request-details [state selector]
   (let [[form button] (form-and-submit (:enlive state) selector)
