@@ -4,7 +4,7 @@
   :min-lein-version "2.0.0"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.4.0"]
+  :dependencies [[org.clojure/clojure "1.6.0"]
                  [peridot "0.3.0"]
                  [enlive "1.0.0" :exclusions [org.clojure/clojure]]
                  [ring/ring-codec "1.0.0"]
