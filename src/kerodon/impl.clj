@@ -82,7 +82,9 @@
     (not-found "link" selector)))
 
 (defn- field-to-selector [elem]
-  (form-element-by :name (get-in elem [:attrs :name])))
+  (if (= "radio" (get-in elem [:attrs :type]))
+    (form-element-by :value (get-in elem [:attrs :value]))
+    (form-element-by :name (get-in elem [:attrs :name]))))
 
 (defn- label-to-selector [doc label]
   (if-let [id (get-in label [:attrs :for])]
