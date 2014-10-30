@@ -470,7 +470,7 @@
                                             :id "radio2"}]))]
           (testing "check by selector"
             (is (= "radio1=A" (-> state (check :#radio1) submit))))
-          (testing "check by atribute selector"
+          (testing "check by attribute selector"
             (is (= "radio1=A" (-> state (check [:input (enlive/attr= :type "radio" :name "radio1" :value "A")]) submit))))
           ))
       (testing "checkbox inside label"
