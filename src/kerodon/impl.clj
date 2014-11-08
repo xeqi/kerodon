@@ -19,8 +19,11 @@
 
 ;; selectors
 
-(defn form-element-by [attr val]
-  [:form (enlive/attr-has attr val)])
+(defn form-element-by
+  ([attr-map]
+    [:form (vec (map (fn [[attr val]] (enlive/attr-has attr val)) attr-map))])
+  ([attr val]
+    [:form (enlive/attr-has attr val)]))
 
 (defn css-or-content [selector]
   (if (string? selector)
@@ -82,7 +85,9 @@
     (not-found "link" selector)))
 
 (defn- field-to-selector [elem]
-  (form-element-by :name (get-in elem [:attrs :name])))
+  (if (= "radio" (get-in elem [:attrs :type]))
+    (form-element-by (select-keys (:attrs elem) [:name :value]))
+    (form-element-by :name (get-in elem [:attrs :name]))))
 
 (defn- label-to-selector [doc label]
   (if-let [id (get-in label [:attrs :for])]

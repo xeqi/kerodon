@@ -16,6 +16,8 @@
                                    [ring/ring-core "1.1.5"]
                                    [hiccup "1.0.1"]]
                     :resource-paths ["test-resources"]}
-             :1.5 {:dependencies [[org.clojure/clojure "1.5.1"]]}
-             :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}}
-  :aliases {"all" ["with-profile" "test:test,1.5:test,1.6"]})
+             :dev  {:dependencies [^:replace [org.clojure/clojure "1.6.0"]]}
+             :1.4  {:dependencies [^:replace [org.clojure/clojure "1.4.0"]]}
+             :1.5  {:dependencies [^:replace [org.clojure/clojure "1.5.1"]]}
+             :1.6  {:dependencies [^:replace [org.clojure/clojure "1.6.0"]]}}
+  :aliases {"all" ["with-profile" "test,1.4:test,1.5:test,1.6"]})

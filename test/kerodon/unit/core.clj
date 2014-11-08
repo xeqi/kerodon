@@ -459,6 +459,20 @@
             (is (= "" (-> state (uncheck "Remember") submit))))
           (testing "uncheck by selector"
             (is (= "" (-> state (uncheck :#remember) submit))))))
+      (testing "checked radio"
+        (let [state (build-state '([:input {:type :radio
+                                            :value "A"
+                                            :name "radio1"
+                                            :id "radio1"}]
+                                   [:input {:type :radio
+                                            :value "B"
+                                            :name "radio1"
+                                            :id "radio2"}]))]
+          (testing "check by selector"
+            (is (= "radio1=A" (-> state (check :#radio1) submit))))
+          (testing "check by attribute selector"
+            (is (= "radio1=A" (-> state (check [:input (enlive/attr= :type "radio" :name "radio1" :value "A")]) submit))))
+          ))
       (testing "checkbox inside label"
         (let [state (build-state '([:label
                                     "Remember"
