@@ -20,10 +20,10 @@
 ;; selectors
 
 (defn form-element-by
-  ([attr-map]
-    [:form (vec (map (fn [[attr val]] (enlive/attr-has attr val)) attr-map))])
-  ([attr val]
-    [:form (enlive/attr-has attr val)]))
+  "Turn a map of {:attr 'value'} into an elive selector for items
+  in a form whose attributes all match"
+  [attr-map]
+  [:form (mapv (partial apply enlive/attr-has) attr-map)])
 
 (defn css-or-content [selector]
   (if (string? selector)
@@ -85,18 +85,20 @@
     (not-found "link" selector)))
 
 (defn- field-to-selector [elem]
-  (if (= "radio" (get-in elem [:attrs :type]))
-    (form-element-by (select-keys (:attrs elem) [:name :value]))
-    (form-element-by :name (get-in elem [:attrs :name]))))
+  (if-let [id (get-in elem [:attrs :id])]
+    (form-element-by {:id id})
+    (if (= "radio" (get-in elem [:attrs :type]))
+      (form-element-by (select-keys (:attrs elem) [:name :value]))
+      (form-element-by {:name (get-in elem [:attrs :name])}))))
 
 (defn- label-to-selector [doc label]
   (if-let [id (get-in label [:attrs :for])]
-    (let [selector (form-element-by :id id)]
+    (let [selector (form-element-by {:id id})]
       (if (first (enlive/select doc selector))
         selector
         (not-found "field" (keyword (str "#" id)))))
     (if-let [field (first (enlive/select label [#{:input :select :textarea}]))]
-      (form-element-by :name (get-in field [:attrs :name]))
+      (field-to-selector field)
       (not-found "field inside label" (apply str (enlive/texts [label]))))))
 
 (defn- form-element-selector [doc elem]

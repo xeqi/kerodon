@@ -460,18 +460,36 @@
           (testing "uncheck by selector"
             (is (= "" (-> state (uncheck :#remember) submit))))))
       (testing "checked radio"
-        (let [state (build-state '([:input {:type :radio
+        (let [state (build-state '([:label {:for "radio1"} "A"]
+                                   [:input {:type :radio
                                             :value "A"
                                             :name "radio1"
                                             :id "radio1"}]
+                                   [:label {:for "radio2"} "B"]
                                    [:input {:type :radio
                                             :value "B"
                                             :name "radio1"
                                             :id "radio2"}]))]
+          (testing "check by label"
+            (is (= "radio1=A" (-> state (check "A") submit))))
           (testing "check by selector"
             (is (= "radio1=A" (-> state (check :#radio1) submit))))
-          (testing "check by attribute selector"
-            (is (= "radio1=A" (-> state (check [:input (enlive/attr= :type "radio" :name "radio1" :value "A")]) submit))))
+          (testing "check other by label"
+            (is (= "radio1=B" (-> state (check "B") submit))))
+          (testing "check other by selector"
+            (is (= "radio1=B" (-> state (check :#radio2) submit))))
+
+          (comment "TODO: support radio buttons fully via (check)?"
+            (testing "check one then other by label"
+              (is (= "radio1=A" (-> state
+                                    (check "B")
+                                    (check "A")
+                                    submit))))
+            (testing "check one then other by selector"
+              (is (= "radio1=A" (-> state
+                                    (check :#radio2)
+                                    (check :#radio1)
+                                    submit)))))
           ))
       (testing "checkbox inside label"
         (let [state (build-state '([:label
