@@ -1,4 +1,4 @@
-(defproject kerodon "0.5.0"
+(defproject kerodon "0.6.0-SNAPSHOT"
   :description "Acceptance test framework for web applications"
   :url "https://github.com/xeqi/kerodon"
   :min-lein-version "2.0.0"
