@@ -36,11 +36,11 @@
              ~expected
              (~'regex? ~expected)))
 
-(defmacro regex-in? [expected]
+(defmacro some-regex? [expected]
   `(validate re-find?
              #(apply str (enlive/texts (:enlive %)))
              ~expected
-             (~'regex-in? ~expected)))
+             (~'some-regex? ~expected)))
 
 (defmacro text? [expected]
   `(validate =
@@ -48,27 +48,31 @@
              ~expected
              (~'text? ~expected)))
 
-(defmacro text-in? [expected]
+(defmacro some-text? [expected]
   `(validate #(.contains %1 %2)
              #(apply str (enlive/texts (:enlive %)))
              ~expected
-             (~'text-in? ~expected)))
+             (~'some-text? ~expected)))
 
-(defmacro link? [key & [val]]
-  `(validate #(let [href# (:href %2)
-                    text# (:text %2)]
-                (some (fn [link#]
-                        (or (and href# (= href# (:href link#)))
-                            (and text# (= text# (:text link#)))))
-                      %1))
-             #(map (fn [link#]
-                     {:href (get-in link# [:attrs :href])
-                      :text (apply str (enlive/texts (:content link#)))})
-                   (enlive/select (:enlive %) [:a]))
-             (if (nil? ~val)
-               {:href ~key}
-               {~key ~val})
-             (~'link? ~key ~val)))
+(defn submap?
+  "Checks whether m contains all entries in sub."
+  [^java.util.Map m ^java.util.Map sub]
+  (.containsAll (.entrySet m) (.entrySet sub)))
+
+(defmacro link? [text & [href]]
+  (let [expected (if (nil? href)
+                   (list 'link? text)
+                   (list 'link? text href))]
+    `(validate (fn [coll# search#] (some #(submap? %1 search#) coll#))
+               #(map (fn [link#]
+                       {:href (get-in link# [:attrs :href])
+                        :text (apply str (enlive/texts (:content link#)))})
+                     (enlive/select (:enlive %) [:a]))
+               (cond
+                (nil? ~href) {:text ~text}
+                (= :href ~text) {:href ~href}
+                :else {:text ~text :href ~href})
+               ~expected)))
 
 (defmacro heading? [expected]
   `(validate #(some (partial = %2) %1)

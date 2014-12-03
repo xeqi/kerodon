@@ -94,26 +94,26 @@
                       #(text? "yes")
                       state)))))
 
-(deftest test-text-in?
-  (testing "text-in?"
+(deftest test-some-text?
+  (testing "some-text?"
     (let [state {:enlive (parse [:p "this is a test"])}]
       (testing "fails if text is not found"
         (check-report {:type :fail
-                       :expected '(text-in? "foo")
+                       :expected '(some-text? "foo")
                        :actual "this is a test"}
-                      #(text-in? "foo")
+                      #(some-text? "foo")
                       state))
       (testing "fails if content is subset of matcher"
         (check-report {:type :fail
-                       :expected '(text-in? "and this is a test")
+                       :expected '(some-text? "and this is a test")
                        :actual "this is a test"}
-                      #(text-in? "and this is a test")
+                      #(some-text? "and this is a test")
                       state))
       (testing "passes if text is found"
         (check-report {:type :pass
-                       :expected '(text-in? "is a")
+                       :expected '(some-text? "is a")
                        :actual "this is a test"}
-                      #(text-in? "is a")
+                      #(some-text? "is a")
                       state)))))
 
 (deftest test-regex?
@@ -132,20 +132,20 @@
                       #(regex? "f.*r")
                       state)))))
 
-(deftest test-regex-in?
-  (testing "regex-in?"
+(deftest test-some-regex?
+  (testing "some-regex?"
     (let [state {:enlive (parse [:p "Account Number: #12345"])}]
       (testing "fails if regex is not found"
         (check-report {:type :fail
-                       :expected '(regex-in? "\\d{6}")
+                       :expected '(some-regex? "\\d{6}")
                        :actual "Account Number: #12345"}
-                      #(regex-in? "\\d{6}")
+                      #(some-regex? "\\d{6}")
                       state))
       (testing "passes if regex is found"
         (check-report {:type :pass
-                       :expected '(regex-in? "\\d{5}")
+                       :expected '(some-regex? "\\d{5}")
                        :actual "Account Number: #12345"}
-                      #(regex-in? "\\d{5}")
+                      #(some-regex? "\\d{5}")
                       state)))))
 
 (deftest test-attr?
@@ -181,23 +181,17 @@
 (deftest test-link?
   (testing "link?"
     (let [state {:enlive (parse [:p "Click " [:a {:href "/foo"} "here"] " to login"])}]
-      (testing "fails if link is not found"
-        (check-report {:type :fail
-                       :expected '(link? "/bar" nil)
-                       :actual '({:href "/foo" :text "here"})}
-                      #(link? "/bar")
-                      state))
-      (testing "passes if link is found"
+      (testing "matches only text by default"
         (check-report {:type :pass
-                       :expected '(link? "/foo" nil)
-                       :actual [{:href "/foo" :text "here"}]}
-                      #(link? "/foo")
-                      state))
-      (testing "matches only href by default"
-        (check-report {:type :fail
-                       :expected '(link? "here" nil)
+                       :expected '(link? "here")
                        :actual [{:href "/foo" :text "href"}]}
                       #(link? "here")
+                      state))
+      (testing "fails if link is not found"
+        (check-report {:type :fail
+                       :expected '(link? "there")
+                       :actual '({:href "/foo" :text "here"})}
+                      #(link? "there")
                       state))
       (testing "can match href explicitly"
         (check-report {:type :pass
@@ -205,11 +199,23 @@
                        :actual [{:href "/foo" :text "href"}]}
                       #(link? :href "/foo")
                       state))
-      (testing "can match text instead of href"
+      (testing "fails if href not found"
+        (check-report {:type :fail
+                       :expected '(link? :href "/bar")
+                       :actual [{:href "/foo" :text "href"}]}
+                      #(link? :href "/bar")
+                      state))
+      (testing "can match both at once"
         (check-report {:type :pass
-                       :expected '(link? :text "here")
+                       :expected '(link? "here" "/foo")
                        :actual [{:href "/foo" :text "here"}]}
-                      #(link? :text "here")
+                      #(link? "here" "/foo")
+                      state))
+      (testing "fails if not both matching"
+        (check-report {:type :fail
+                       :expected '(link? "here" "/bar")
+                       :actual [{:href "/foo" :text "here"}]}
+                      #(link? "here" "/bar")
                       state)))))
 
 (deftest test-heading?

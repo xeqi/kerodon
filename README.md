@@ -170,13 +170,13 @@ The api namespace for testing is ```kerodon.test```.  This uses the same machine
 The main function is ```has```.  It allows the verifications to compose using ->.  It requires one of the verification functions, and an optional error message.
 
 You can use ```status?``` to validate the status code of the last response.
-You can use ```text?``` or ```regex?``` to validate the text in the page.
-You can use ```text-in?``` or ```regex-in?``` to look for text anywhere in the page.
+You can use ```text?``` or ```regex?``` to validate the text in the page/element.
+You can use ```some-text?``` or ```some-regex?``` to look for text anywhere in the page/element.
 You can use ```value?``` to validate the value of a field.  The
 selector can be the text or css of a label with a for element, or the
 css of the field itself.
 You can use ```attr?``` to validate an attribute's value.
-You can use ```link?``` to look for an anchor tag with matching href, or (optionally) text.
+You can use ```link?``` to look for an anchor tag with matching text, href or both.
 You can use ```heading?``` to look for a heading (h1 - h6) with matching text.
 
 ```clojure
@@ -186,7 +186,7 @@ You can use ```heading?``` to look for a heading (h1 - h6) with matching text.
          "page is found")
     (has (text? "hello world")
          "page says hello world")
-    (has (regex? ".*world.*")
+    (has (some-text? "world")
          "page includes 'world'"))
 
 (-> (session ring-app)
@@ -202,9 +202,9 @@ You can use ```heading?``` to look for a heading (h1 - h6) with matching text.
 
 (-> (session ring-app)
 	(visit "/welcome")
-	(has (link? "/session/new")
+	(has (link? "Login")
 		 "page has link to login")
-	(has (link? :text "Login")
+	(has (link? :href "/session/new")
 		"login link text is 'Login'"))
 ```
 
