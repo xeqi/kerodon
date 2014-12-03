@@ -183,7 +183,7 @@ You can use ```attr?``` to validate an attribute's value.
          "page is found")
     (has (text? "hello world")
          "page says hello world")
-    (has (regex? ".*world.*")
+    (has (regex? "(?s).*world.*") ; NOTE: (?s) to match multiline
          "page includes 'world'"))
 
 (-> (session ring-app)
