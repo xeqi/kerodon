@@ -16,8 +16,9 @@
       (is (= (:type map) (:type test-report)))
       (is (= (:expected map) (:expected test-report)))
       (if (= (:type map) :error)
-        (is ((:actual map) (:actual test-report)))
-        (is (= (:actual map))  (:actual test-report)))
+        ;; if :error, use (:validator-fn map) to validate (:actual test-report)
+        (is ((:validator-fn map) (:actual test-report)))
+        (is (= (:actual map) (:actual test-report))))
       (if (= (:type map) :fail)
         (is (= "test.clj" (:file test-report))))
       (is (= "asdf" (:message test-report))))))
@@ -43,10 +44,10 @@
       (testing "errors if field is missing"
         (check-report {:type :error
                        :expected '(value? "Unknown" 3)
-                       :actual (fn [v]
-                                 (re-find
-                                  #"field could not be found with selector \"Unknown\""
-                                  (.getMessage v)))}
+                       :validator-fn
+                       #(re-find
+                         #"field could not be found with selector \"Unknown\""
+                         (.getMessage %))}
                       #(value? "Unknown" 3)
                       state))
       (testing "passes if =, field found by"
@@ -162,13 +163,13 @@
           (testing "missing"
             (check-report {:type :fail
                            :expected '(attr? [:p] :unknown "x")
-                           :actual ""}
+                           :actual nil}
                           #(attr? [:p] :unknown "x")
                           state)))
         (testing "element is missing"
           (check-report {:type :fail
                          :expected '(attr? [:tr] :data-url "")
-                         :actual ""}
+                         :actual nil}
                         #(attr? [:tr] :data-url "")
                         state)))
       (testing "passes if attribute is right"
@@ -184,7 +185,7 @@
       (testing "matches only text by default"
         (check-report {:type :pass
                        :expected '(link? "here")
-                       :actual [{:href "/foo" :text "href"}]}
+                       :actual [{:href "/foo" :text "here"}]}
                       #(link? "here")
                       state))
       (testing "fails if link is not found"
@@ -196,13 +197,13 @@
       (testing "can match href explicitly"
         (check-report {:type :pass
                        :expected '(link? :href "/foo")
-                       :actual [{:href "/foo" :text "href"}]}
+                       :actual [{:href "/foo" :text "here"}]}
                       #(link? :href "/foo")
                       state))
       (testing "fails if href not found"
         (check-report {:type :fail
                        :expected '(link? :href "/bar")
-                       :actual [{:href "/foo" :text "href"}]}
+                       :actual [{:href "/foo" :text "here"}]}
                       #(link? :href "/bar")
                       state))
       (testing "can match both at once"
