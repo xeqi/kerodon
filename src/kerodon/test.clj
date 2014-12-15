@@ -1,5 +1,6 @@
 (ns kerodon.test
-  (:require [net.cgrand.enlive-html :as enlive]
+  (:require [clojure.string :as s]
+            [net.cgrand.enlive-html :as enlive]
             [kerodon.impl :as impl]))
 
 (defn has
@@ -24,6 +25,23 @@
                                      :expected (quote ~exp-msg)})))
      state#))
 
+(defn- collapse-extra-whitespace
+  "Replace one or more consecutive whitespaces with a single space,
+  i.e., unwraps all text onto a single line."
+  [state]
+  (-> (:enlive state)
+      (enlive/texts)
+      (s/join)
+      (s/replace #"\s+" " ")))
+
+(defmacro validate-text
+  "Common macro for all text validation"
+  [test comparator expected]
+  `(validate ~comparator
+             ~collapse-extra-whitespace
+             ~expected
+             (~test ~expected)))
+
 (defn re-match? [s r]
   (not (nil? (re-matches (re-pattern r) s))))
 
@@ -31,28 +49,16 @@
   (not (nil? (re-find (re-pattern r) s))))
 
 (defmacro regex? [expected]
-  `(validate re-match?
-             #(apply str (enlive/texts (:enlive %)))
-             ~expected
-             (~'regex? ~expected)))
+  `(validate-text ~'regex? re-match? ~expected))
 
 (defmacro some-regex? [expected]
-  `(validate re-find?
-             #(apply str (enlive/texts (:enlive %)))
-             ~expected
-             (~'some-regex? ~expected)))
+  `(validate-text ~'some-regex? re-find? ~expected))
 
 (defmacro text? [expected]
-  `(validate =
-             #(apply str (enlive/texts (:enlive %)))
-             ~expected
-             (~'text? ~expected)))
+  `(validate-text ~'text? = ~expected))
 
 (defmacro some-text? [expected]
-  `(validate #(.contains %1 %2)
-             #(apply str (enlive/texts (:enlive %)))
-             ~expected
-             (~'some-text? ~expected)))
+  `(validate-text ~'some-text? #(.contains %1 %2) ~expected))
 
 (defn submap?
   "Checks whether m contains all entries in sub."

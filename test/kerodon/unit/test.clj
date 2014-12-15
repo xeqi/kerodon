@@ -93,6 +93,19 @@
                        :expected '(text? "yes")
                        :actual "yes"}
                       #(text? "yes")
+                      state)))
+    (let [state {:enlive (parse [:p "yes  sir\n\n\nyes"])}]
+      (testing "fails an exact match due to significant whitespace"
+        (check-report {:type     :fail
+                       :expected '(text? "yes  sir\n\n\nyes")
+                       :actual   "yes sir yes"}
+                      #(text? "yes  sir\n\n\nyes")
+                      state))
+      (testing "passes if text is identical after unwrapping lines"
+        (check-report {:type     :pass
+                       :expected '(text? "yes sir yes")
+                       :actual   "yes sir yes"}
+                      #(text? "yes sir yes")
                       state)))))
 
 (deftest test-some-text?
@@ -147,6 +160,19 @@
                        :expected '(some-regex? "\\d{5}")
                        :actual "Account Number: #12345"}
                       #(some-regex? "\\d{5}")
+                      state)))
+    (let [state {:enlive (parse [:p "yes  sir\n\n\nyes"])}]
+      (testing "fails due to significant whitespace"
+        (check-report {:type     :fail
+                       :expected '(some-regex? "sir\\s{3}yes")
+                       :actual   "yes sir yes"}
+                      #(some-regex? "sir\\s{3}yes")
+                      state))
+      (testing "passes due to collapsed whitespace"
+        (check-report {:type     :pass
+                       :expected '(some-regex? "sir\\s{1}yes")
+                       :actual   "yes sir yes"}
+                      #(some-regex? "sir\\s{1}yes")
                       state)))))
 
 (deftest test-attr?

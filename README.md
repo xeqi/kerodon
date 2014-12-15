@@ -172,6 +172,11 @@ The main function is ```has```.  It allows the verifications to compose using ->
 You can use ```status?``` to validate the status code of the last response.
 You can use ```text?``` or ```regex?``` to validate the text in the page/element.
 You can use ```some-text?``` or ```some-regex?``` to look for text anywhere in the page/element.
+Note that for all of ```text?```, ```regex?```, ```some-text?```, and
+```some-regex?``` tests replace all one or more consecutive whitespace
+characters (i.e., ' ', '\t', '\n', etc.) in the text of the page/element with a
+single space.  This feature allows the tests to ignore line breaks and spacing
+issues in the source text.
 You can use ```value?``` to validate the value of a field.  The
 selector can be the text or css of a label with a for element, or the
 css of the field itself.
