@@ -17,7 +17,10 @@
              (if-let [user (:user session)]
                (response/response (str "hi " user))
                (response/response
-                (hiccup/html [:a {:href "/login"} "login"]))))}
+                (hiccup/html [:div
+                              [:a {:href "/some-link"}
+                               [:b "with html"]]
+                              [:a {:href "/login"} "login"]]))))}
      ["login"]
      {:get (constantly
             (response/response
