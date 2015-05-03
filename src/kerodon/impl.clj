@@ -35,7 +35,7 @@
 (defn css-or-label [selector]
   (if (string? selector)
     (enlive/pred #(and (= (:tag %1) :label)
-                       (= (enlive/texts [%1]) [selector])))
+                       (= (-> (enlive/texts [%1]) first clojure.string/trim) selector)))
     selector))
 
 (defn css-or-value [selector]

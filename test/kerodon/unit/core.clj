@@ -498,6 +498,13 @@
                                              :value "Yes"
                                              :name "remember"}]]))]
           (is (= "remember=Yes" (-> state (check "Remember") submit)))))
+      (testing "checkbox inside label with some whitespace"
+        (let [state (build-state '([:label
+                                    "Remember\n   "
+                                    [:input {:type :checkbox
+                                             :value "Yes"
+                                             :name "remember"}]]))]
+          (is (= "remember=Yes" (-> state (check "Remember") submit)))))
       (testing "label without checkbox"
         (let [state (build-state '([:label
                                     "Empty"]))]
