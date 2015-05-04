@@ -535,7 +535,7 @@
                      :uri "/url"
                      :server-name "localhost"
                      :headers {"host" "localhost"
-                               "referrer" "http://localhost/"}
+                               "referer" "http://localhost/"}
                      :server-port 80
                      :body nil}]
         (is (= request (:request (follow-redirect state))))))
