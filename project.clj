@@ -17,8 +17,7 @@
                                    [hiccup "1.0.5"]]
                     :resource-paths ["test-resources"]}
              :dev  {:dependencies [^:replace [org.clojure/clojure "1.6.0"]
-                                   [ring/ring-core "1.4.0"]]
-                    :plugins [[lein-ancient "0.6.7"]]}
+                                   [ring/ring-core "1.4.0"]]}
              :1.4  {:dependencies [^:replace [org.clojure/clojure "1.4.0"]
                                    ^:replace [ring/ring-core "1.3.2"]]}
              :1.5  {:dependencies [^:replace [org.clojure/clojure "1.5.1"]
