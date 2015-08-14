@@ -17,7 +17,8 @@
                                    [javax.servlet/servlet-api "2.5"]
                                    [hiccup "1.0.5"]]
                     :resource-paths ["test-resources"]}
-             :dev  {:dependencies [^:replace [org.clojure/clojure "1.6.0"]]}
+             :dev  {:dependencies [^:replace [org.clojure/clojure "1.6.0"]]
+                    :plugins [[lein-ancient "0.6.7"]]}
              :1.4  {:dependencies [^:replace [org.clojure/clojure "1.4.0"]]}
              :1.5  {:dependencies [^:replace [org.clojure/clojure "1.5.1"]]}
              :1.6  {:dependencies [^:replace [org.clojure/clojure "1.6.0"]]}}
