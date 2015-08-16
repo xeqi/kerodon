@@ -13,13 +13,11 @@
                                     :exclusions
                                     [[org.clojure/clojure]
                                      [ring/ring-core]]]
+                                   [ring/ring-core "1.4.0"]
                                    [javax.servlet/servlet-api "2.5"]
                                    [hiccup "1.0.5"]]
                     :resource-paths ["test-resources"]}
-             :1.4  {:dependencies [^:replace [org.clojure/clojure "1.4.0"]
-                                   ^:replace [ring/ring-core "1.3.2"]]}
-             :1.5  {:dependencies [^:replace [org.clojure/clojure "1.5.1"]
-                                   [ring/ring-core "1.4.0"]]}
-             :1.6  {:dependencies [^:replace [org.clojure/clojure "1.6.0"]
-                                   [ring/ring-core "1.4.0"]]}}
-  :aliases {"all" ["with-profile" "test,1.4:test,1.5:test,1.6"]})
+             :1.5  {:dependencies [^:replace [org.clojure/clojure "1.5.1"]]}
+             :1.6  {:dependencies [^:replace [org.clojure/clojure "1.6.0"]]}
+             :1.7  {:dependencies [^:replace [org.clojure/clojure "1.7.0"]]}}
+  :aliases {"all" ["with-profile" "test,1.5:test,1.6:test,1.7"]})
