@@ -1,4 +1,4 @@
-# kerodon [![Build Status](https://travis-ci.org/xeqi/kerodon.svg?branch=master)](http://travis-ci.org/xeqi/kerodon)
+# kerodon [![Build Status](https://travis-ci.org/xeqi/kerodon.svg?branch=master)](http://travis-ci.org/xeqi/kerodon) [![Dependencies Status](http://jarkeeper.com/xeqi/kerodon/status.png)](http://jarkeeper.com/xeqi/kerodon)
 
 kerodon is an interaction and testing library for [ring](https://github.com/ring-clojure/ring) html based apps. It is intended to look like the interaction a user would have.  It is inspired by [capybara](https://github.com/jnicklas/capybara).
 
