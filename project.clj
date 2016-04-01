@@ -21,4 +21,4 @@
              :1.6  {:dependencies [^:replace [org.clojure/clojure "1.6.0"]]}
              :1.7  {:dependencies [^:replace [org.clojure/clojure "1.7.0"]]}
              :1.8  {:dependencies [^:replace [org.clojure/clojure "1.8.0"]]}}
-  :aliases {"all" ["with-profile" "test,1.5:test,1.6:test,1.7"]})
+  :aliases {"all" ["with-profile" "test,1.5:test,1.6:test,1.7:test,1.8"]})
