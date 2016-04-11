@@ -38,7 +38,21 @@
               (if (and (= (params "user") "someone")
                        (= (params "password") "password"))
                 (assoc (response/redirect "/") :session {:user "someone"})
-                (response/response "Bad login")))}))))
+                (response/response "Bad login")))}
+     ["post-without-form-action"]
+     {:get (constantly
+            (response/response
+             (hiccup/html [:form {:method "post"}
+                           [:label {:for "title"} "Title"]
+                           [:input {:type "text" :name "title" :id "title"}]
+                           [:label {:for "content"} "Content"]
+                           [:textarea {:name "content" :id "content"}]
+                           [:input {:type "submit" :value "Submit"}]])))
+      :post (fn [{:keys [params]}]
+              (if (and (seq (params "title"))
+                       (seq (params "content")))
+                (response/response "Complete")
+                (response/response "Bad request")))}))))
 
 (deftest user-can-login-and-see-name
   (-> (session app)
@@ -50,3 +64,19 @@
       (press "Login")
       (follow-redirect)
       (has (text? "hi someone"))))
+
+(deftest user-can-post-and-see-complete-message
+  (testing "when filled all items"
+    (-> (session app)
+        (visit "/post-without-form-action?param-a=1&param-b=2")
+        (fill-in "Title" "some-title")
+        (fill-in "Content" "some-content")
+        (press "Submit")
+        (has (text? "Complete"))))
+
+  (testing "when filled just one items"
+    (-> (session app)
+        (visit "/post-without-form-action?param-a=1&param-b=2")
+        (fill-in "Title" "some-title")
+        (press "Submit")
+        (has (text? "Bad request")))))
