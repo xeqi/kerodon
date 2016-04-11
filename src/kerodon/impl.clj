@@ -144,7 +144,8 @@
                   (not= port (scheme {:https 443 :http 80})))
          (str ":" port))
        uri
-       query-string))
+       (when query-string
+         (str "?" query-string))))
 
 (defn get-value [state selector]
   (or (-> (:enlive state)
