@@ -86,14 +86,12 @@
     link
     (not-found "link" selector)))
 
-(defn- field-to-selector [elem & [selector]]
-  (if selector
-    [:form selector]
-    (if-let [id (get-in elem [:attrs :id])]
-      (form-element-by {:id id})
-      (if (= "radio" (get-in elem [:attrs :type]))
-        (form-element-by (select-keys (:attrs elem) [:name :value]))
-        (form-element-by {:name (get-in elem [:attrs :name])})))))
+(defn- field-to-selector [elem]
+  (if-let [id (get-in elem [:attrs :id])]
+    (form-element-by {:id id})
+    (if (= "radio" (get-in elem [:attrs :type]))
+      (form-element-by (select-keys (:attrs elem) [:name :value]))
+      (form-element-by {:name (get-in elem [:attrs :name])}))))
 
 (defn- label-to-selector [doc label]
   (if-let [id (get-in label [:attrs :for])]
@@ -108,7 +106,7 @@
 (defn- form-element-selector [doc selector elem]
   (if (= :label (:tag elem))
     (label-to-selector doc elem)
-    (field-to-selector elem selector)))
+    [selector]))
 
 (defn form-element-query [node selector]
   (->> (form-element node selector)

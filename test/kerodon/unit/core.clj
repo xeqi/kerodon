@@ -343,13 +343,11 @@
                                    [:input.array-input {:name "something"}]
                                    [:input.array-input {:name "something"}]
                                    [:input {:type "submit" :value "Submit"}]])}
-            selectors (map (fn [n]
-                               [n [[:.array-input (enlive/nth-of-type n)]]])
-                           [1 2])
-            new-state (reduce (fn [prev [n selector]]
-                                  (fill-in prev selector n))
-                              state selectors)
-            result "something=1&something=2"]
+            nth-selector (fn [n] [:.array-input (enlive/nth-of-type n)])
+            new-state (-> state
+                          (fill-in (nth-selector 1) "a")
+                          (fill-in (nth-selector 2) "b"))
+            result "something=a&something=b"]
         (is (= result (form-params new-state "Submit")))))
     (testing "selector not found throws exception"
       (let [state {:app (constantly :x)
