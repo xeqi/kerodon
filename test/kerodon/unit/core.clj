@@ -340,14 +340,14 @@
       ;; from issue #47 when multiple inputs share the same name:
       (let [state {:app (constantly :x)
                    :enlive (parse [:form {:action "/" :method "post"}
-                                   [:input.array-input {:name "something"}]
-                                   [:input.array-input {:name "something"}]
+                                   [:input.array-input {:name "something[]"}]
+                                   [:input.array-input {:name "something[]"}]
                                    [:input {:type "submit" :value "Submit"}]])}
-            nth-selector (fn [n] [:.array-input (enlive/nth-of-type n)])
+            nth-array-input (fn [n] [:.array-input (enlive/nth-of-type n)])
             new-state (-> state
-                          (fill-in (nth-selector 1) "a")
-                          (fill-in (nth-selector 2) "b"))
-            result "something=a&something=b"]
+                          (fill-in (nth-array-input 1) "a")
+                          (fill-in (nth-array-input 2) "b"))
+            result "something%5B%5D=a&something%5B%5D=b"]
         (is (= result (form-params new-state "Submit")))))
     (testing "selector not found throws exception"
       (let [state {:app (constantly :x)
