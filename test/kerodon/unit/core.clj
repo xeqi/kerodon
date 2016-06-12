@@ -335,6 +335,20 @@
       (test-fill-in-helper '([:label {:for "message-id"} "Message"]
                              [:textarea {:id "message-id" :name "message"}])
                            "Message" :#message-id "blah" "message=blah"))
+    (testing "multiple array inputs"
+      ;; not using label since doing so requires id, and having an id masks the problem
+      ;; from issue #47 when multiple inputs share the same name:
+      (let [state {:app (constantly :x)
+                   :enlive (parse [:form {:action "/" :method "post"}
+                                   [:input.array-input {:name "something[]"}]
+                                   [:input.array-input {:name "something[]"}]
+                                   [:input {:type "submit" :value "Submit"}]])}
+            nth-array-input (fn [n] [:.array-input (enlive/nth-of-type n)])
+            new-state (-> state
+                          (fill-in (nth-array-input 1) "a")
+                          (fill-in (nth-array-input 2) "b"))
+            result "something%5B%5D=a&something%5B%5D=b"]
+        (is (= result (form-params new-state "Submit")))))
     (testing "selector not found throws exception"
       (let [state {:app (constantly :x)
                    :enlive (parse [:form {:method "post"} [:input {:name "something"}]])}]

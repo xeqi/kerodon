@@ -103,14 +103,14 @@
       (field-to-selector field)
       (not-found "field inside label" (apply str (enlive/texts [label]))))))
 
-(defn- form-element-selector [doc elem]
+(defn- form-element-selector [doc selector elem]
   (if (= :label (:tag elem))
     (label-to-selector doc elem)
-    (field-to-selector elem)))
+    [selector]))
 
 (defn form-element-query [node selector]
   (->> (form-element node selector)
-       (form-element-selector node)))
+       (form-element-selector node selector)))
 
 (defn form-element-for [node selector]
   (enlive/select node (form-element-query node selector)))
