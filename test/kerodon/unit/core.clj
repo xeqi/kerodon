@@ -213,7 +213,7 @@
                                    :content '("File")}
                                   {:tag :input
                                    :attrs {:value (proxy [java.io.File]
-                                                    ["file"])
+                                                    ["test-resources/file.txt"])
                                            :type "file"
                                            :name "file"
                                            :id "file-id"}
