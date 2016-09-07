@@ -13,7 +13,7 @@
                                     :exclusions
                                     [[org.clojure/clojure]
                                      [ring/ring-core]]]
-                                   [ring/ring-core "1.4.0"]
+                                   [ring/ring-core "1.5.0"]
                                    [javax.servlet/servlet-api "2.5"]
                                    [hiccup "1.0.5"]]
                     :resource-paths ["test-resources"]}
