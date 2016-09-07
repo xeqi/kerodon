@@ -8,7 +8,7 @@
                  [peridot "0.4.0"]
                  [enlive "1.1.6" :exclusions [org.clojure/clojure]]
                  [ring/ring-codec "1.0.1"]
-                 [org.flatland/ordered "1.5.3"]]
+                 [org.flatland/ordered "1.5.4"]]
   :profiles {:test {:dependencies [[net.cgrand/moustache "1.1.0"
                                     :exclusions
                                     [[org.clojure/clojure]
