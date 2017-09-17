@@ -58,7 +58,7 @@
   `(validate-text ~'text? = ~expected))
 
 (defmacro some-text? [expected]
-  `(validate-text ~'some-text? #(.contains %1 %2) ~expected))
+  `(validate-text ~'some-text? #(.contains ^String %1 ^CharSequence %2) ~expected))
 
 (defn submap?
   "Checks whether m contains all entries in sub."
