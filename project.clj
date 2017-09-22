@@ -1,14 +1,22 @@
-(defproject kerodon "0.8.0"
+(defproject kerodon "0.9.0-SNAPSHOT"
   :description "Acceptance test framework for web applications"
   :url "https://github.com/xeqi/kerodon"
   :min-lein-version "2.0.0"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [peridot "0.4.4"]
+                 [peridot "0.5.0"]
                  [enlive "1.1.6" :exclusions [org.clojure/clojure]]
                  [ring/ring-codec "1.0.1"]
                  [org.flatland/ordered "1.5.4"]]
+  :release-tasks [["vcs" "assert-committed"]
+                  ["change" "version" "leiningen.release/bump-version" "release"]
+                  ["vcs" "commit"]
+                  ["vcs" "tag" "v"]
+                  ["deploy"]
+                  ["change" "version" "leiningen.release/bump-version"]
+                  ["vcs" "commit"]
+                  ["vcs" "push"]]
   :profiles {:test {:dependencies [[net.cgrand/moustache "1.1.0"
                                     :exclusions
                                     [[org.clojure/clojure]
