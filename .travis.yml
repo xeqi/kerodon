@@ -1,2 +1,8 @@
 language: clojure
+install: lein all deps
 script: lein all test
+jdk:
+- oraclejdk8
+- oraclejdk9
+- oraclejdk10
+- oraclejdk11
