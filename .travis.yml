@@ -8,3 +8,7 @@ jdk:
 - oraclejdk10
 - oraclejdk11
 - oraclejdk-ea
+addons:
+  apt:
+    packages:
+      - ca-certificates
