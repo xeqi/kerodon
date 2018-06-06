@@ -3,6 +3,7 @@ script: lein all test
 jdk:
 - oraclejdk8
 - oraclejdk9
+- openjdk9
 - oraclejdk10
 - oraclejdk11
 - oraclejdk-ea
