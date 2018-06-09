@@ -1,13 +1,21 @@
-language: clojure 
+language: clojure
 install: lein all deps
 script: lein all test
 jdk:
-- oraclejdk8
-- oraclejdk9
-- oraclejdk10
-- oraclejdk11
-- oraclejdk-ea
-addons:
-  apt:
-    packages:
-      - ca-certificates
+  - oraclejdk7
+  - oraclejdk8
+  - oraclejdk9
+  - oraclejdk10
+  - oraclejdk11
+  - oraclejdk-ea
+  - openjdk7
+  - openjdk8
+  - openjdk10
+  - openjdk11
+  - openjdk-ea
+matrix:
+  include:
+    - jdk: openjdk9
+      before_install:
+        - rm "${JAVA_HOME}/lib/security/cacerts"
+        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
