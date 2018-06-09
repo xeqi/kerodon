@@ -9,12 +9,16 @@ jdk:
   - oraclejdk11
   - oraclejdk12
   - oraclejdk-ea
+  - oraclejdk-rc
+  - oraclejdk-ga
   - openjdk7
   - openjdk8
   - openjdk10
   - openjdk11
   - openjdk12
   - openjdk-ea
+  - openjdk-rc
+  - openjdk-ga
 matrix:
   include:
     - jdk: openjdk9
