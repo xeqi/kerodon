@@ -5,3 +5,6 @@ jdk:
   - openjdk8
   - openjdk11
   - openjdk-ea
+cache:
+  directories:
+    - $HOME/.m2
