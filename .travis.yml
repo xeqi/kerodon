@@ -3,20 +3,5 @@ install: lein all deps
 script: lein all test
 jdk:
   - openjdk8
-  - openjdk9
-  - openjdk10
   - openjdk11
   - openjdk-ea
-  - oraclejdk8
-  - oraclejdk10
-  - oraclejdk-ea
-matrix:
-  include:
-    - jdk: openjdk10
-      before_install:
-        - rm "${JAVA_HOME}/lib/security/cacerts"
-        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
-    - jdk: openjdk-ea
-      before_install:
-        - rm "${JAVA_HOME}/lib/security/cacerts"
-        - ln -s /etc/ssl/certs/java/cacerts "${JAVA_HOME}/lib/security/cacerts"
