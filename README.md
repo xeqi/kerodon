@@ -2,6 +2,8 @@
 
 kerodon is an interaction and testing library for [ring](https://github.com/ring-clojure/ring) html based apps. It is intended to look like the interaction a user would have.  It is inspired by [capybara](https://github.com/jnicklas/capybara).
 
+See also [peridot](https://github.com/xeqi/peridot) for an API for interacting with Ring apps.
+
 ## Dependency Information
 
 [![Clojars Project](http://clojars.org/kerodon/latest-version.svg)](http://clojars.org/kerodon)
