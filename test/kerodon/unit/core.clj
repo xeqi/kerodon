@@ -41,9 +41,9 @@
       (testing "has correct request"
         (let [request {:server-port 80
                        :server-name "localhost"
-                       :remote-addr "localhost"
+                       :remote-addr "127.0.0.1"
                        :uri "/"
-                       :query-string nil
+                       :protocol "HTTP/1.1"
                        :scheme :http
                        :request-method :get
                        :headers {"host" "localhost"}
@@ -71,9 +71,9 @@
       (testing "has correct request"
         (let [request {:server-port 80
                        :server-name "localhost"
-                       :remote-addr "localhost"
+                       :remote-addr "127.0.0.1"
                        :uri "/login"
-                       :query-string nil
+                       :protocol "HTTP/1.1"
                        :scheme :http
                        :request-method :get
                        :headers {"host" "localhost"}
@@ -120,9 +120,9 @@
                                 "Button Login"]])
                :request {:server-port 80
                          :server-name "localhost"
-                         :remote-addr "localhost"
+                         :remote-addr "127.0.0.1"
                          :uri "/login"
-                         :query-string nil
+                         :protocol "HTTP/1.1"
                          :scheme :http
                          :request-method :get
                          :headers {"host" "localhost"}}}]
@@ -151,11 +151,12 @@
   (testing "press"
     (let [query (str "user=user-value&password=password-value")]
       (testing "without method"
-        (let [request {:remote-addr "localhost"
+        (let [request {:remote-addr "127.0.0.1"
                        :scheme :http
                        :request-method :get
                        :query-string query
                        :uri "/login"
+                       :protocol "HTTP/1.1"
                        :server-name "localhost"
                        :headers {"host" "localhost"}
                        :server-port 80}
@@ -166,12 +167,12 @@
           (testing "empty action"
             (test-press-method {:action ""} request t))))
       (testing "with method :post"
-        (let [request {:remote-addr "localhost"
+        (let [request {:remote-addr "127.0.0.1"
                        :scheme :http
                        :request-method :post
-                       :query-string nil
                        :content-type "application/x-www-form-urlencoded"
                        :uri "/login"
+                       :protocol "HTTP/1.1"
                        :server-name "localhost"
                        :headers {"content-length" (str (count query))
                                  "content-type"
@@ -186,11 +187,12 @@
           (testing "empty action"
             (test-press-method {:action "" :method :post} request t))))
       (testing "with method :get"
-        (let [request {:remote-addr "localhost"
+        (let [request {:remote-addr "127.0.0.1"
                        :scheme :http
                        :request-method :get
                        :query-string query
                        :uri "/login"
+                       :protocol "HTTP/1.1"
                        :server-name "localhost"
                        :headers {"host" "localhost"}
                        :server-port 80}
@@ -225,17 +227,17 @@
                                    :content nil})})
                      :request {:server-port 80
                                :server-name "localhost"
-                               :remote-addr "localhost"
+                               :remote-addr "127.0.0.1"
                                :uri "/login"
-                               :query-string nil
+                               :protocol "HTTP/1.1"
                                :scheme :http
                                :request-method :get
                                :headers {"host" "localhost"}}}
-              request {:remote-addr "localhost"
+              request {:remote-addr "127.0.0.1"
                        :scheme :http
                        :request-method :post
-                       :query-string nil
                        :uri "/login"
+                       :protocol "HTTP/1.1"
                        :server-name "localhost"
                        :headers {"host" "localhost"}
                        :server-port 80}]
@@ -291,7 +293,7 @@
                                         :value "Cancel"}]])
                :request {:server-port 80
                          :server-name "localhost"
-                         :remote-addr "localhost"
+                         :remote-addr "127.0.0.1"
                          :uri "/login"
                          :query-string nil
                          :scheme :http
@@ -534,19 +536,18 @@
                    :response {:status 302
                               :headers {"Location" "/url"}
                               :body ""}
-                   :request {:remote-addr "localhost"
+                   :request {:remote-addr "127.0.0.1"
                              :scheme :http
                              :request-method :get
-                             :query-string nil
                              :uri "/"
                              :server-name "localhost"
                              :headers {"host" "localhost"}
                              :server-port 80}}
-            request {:remote-addr "localhost"
+            request {:remote-addr "127.0.0.1"
                      :scheme :http
                      :request-method :get
-                     :query-string nil
                      :uri "/url"
+                     :protocol "HTTP/1.1"
                      :server-name "localhost"
                      :headers {"host" "localhost"
                                "referer" "http://localhost/"}
